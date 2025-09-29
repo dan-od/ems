@@ -1,0 +1,367 @@
+/* Container */
+.requests-container,
+.request-detail-container,
+.request-form-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Headers */
+.requests-header,
+.request-detail-header,
+.request-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.requests-header h1,
+.request-form-header h1,
+.request-detail-header h1 {
+  margin: 0;
+  color: #333;
+}
+
+/* Buttons */
+button,
+.new-request-btn,
+.cancel-btn,
+.submit-btn,
+.back-button,
+.action-buttons button,
+.request-actions .approve-btn,
+.request-actions .reject-btn {
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.new-request-btn,
+.submit-btn,
+.action-buttons .approve-btn,
+.request-actions .approve-btn {
+  background-color: #4CAF50;
+  color: #fff;
+}
+.new-request-btn:hover,
+.submit-btn:hover,
+.action-buttons .approve-btn:hover,
+.request-actions .approve-btn:hover {
+  background-color: #45a049;
+}
+
+.action-buttons .reject-btn,
+.request-actions .reject-btn {
+  background-color: #f44336;
+  color: #fff;
+}
+.action-buttons .reject-btn:hover,
+.request-actions .reject-btn:hover {
+  background-color: #e53935;
+}
+
+.action-buttons .view-btn {
+  background-color: #2196f3;
+  color: #fff;
+}
+.action-buttons .view-btn:hover {
+  background-color: #1e88e5;
+}
+
+.cancel-btn {
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #666;
+}
+.cancel-btn:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.back-button {
+  padding: 0.5rem 1rem;
+  background-color: #f0f0f0;
+  color: #333;
+  font-size: 0.9rem;
+}
+.back-button:hover {
+  background-color: #e0e0e0;
+}
+
+.submit-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Requests List */
+.requests-list,
+.request-form,
+.request-detail-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  padding: 2rem;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+}
+tr:hover {
+  background: #f5f5f5;
+}
+
+/* Status & Priority Badges */
+.status-badge,
+.priority-badge,
+.new-equipment-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+.status-badge.approved {
+  background: #d4edda;
+  color: #155724;
+}
+.status-badge.rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.priority-badge.low {
+  background: #6c757d;
+  color: #fff;
+}
+.priority-badge.medium {
+  background: #ffc107;
+  color: #000;
+}
+.priority-badge.high {
+  background: #dc3545;
+  color: #fff;
+}
+
+.new-equipment-tag {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+/* Info Grid */
+.request-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.info-label {
+  color: #666;
+  font-size: 0.9rem;
+}
+.info-value {
+  color: #333;
+  font-weight: 500;
+}
+
+/* Text Blocks */
+.request-subject,
+.request-description {
+  color: #333;
+  margin: 0;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+.request-description {
+  color: #444;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Actions */
+.request-actions,
+.form-actions,
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 30px;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+}
+
+/* Loading & Errors */
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+.error,
+.error-message {
+  background: #f8d7da;
+  border: 1px solid #fcc;
+  color: #dc3545;
+  text-align: center;
+  padding: 12px 20px;
+  border-radius: 4px;
+  margin: 20px 0;
+}
+
+/* Request Type Buttons */
+.request-type-group .radio-group {
+  display: flex;
+  gap: 20px;
+}
+
+.radio-option {
+  flex: 1;
+  text-align: center;
+  padding: 16px 24px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+/* Hover effect */
+.radio-option:hover {
+  border-color: #ff7f27; /* your orange */
+  background: #fff5ee;   /* subtle orange tint */
+}
+
+/* Hide the default radio circle */
+.radio-option input[type="radio"] {
+  display: none;
+}
+
+/* Checked state → active orange button */
+.radio-option input[type="radio"]:checked + .radio-label {
+  color: #fff;
+  background: #ff7f27; /* main orange */
+  border-color: #ff7f27;
+  border-radius: 8px;
+  padding: 16px 24px;
+  display: block;
+}
+
+/* Toggle buttons */
+.request-type-toggle {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.type-btn {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s;
+  color: #333;
+
+}
+.type-btn:hover {
+  border-color: #ff7f27;
+  background: #fff3e6;
+}
+.type-btn.active {
+  background: #ff7f27;
+  border-color: #ff7f27;
+  color: #fff;
+}
+
+/* Autocomplete */
+.autocomplete {
+  position: relative;
+}
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  margin-top: 2px;
+  padding: 0;
+  list-style: none;
+}
+.suggestions li {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.suggestions li:hover {
+  background: #ffe5d0;
+}
+.suggestions .add-new {
+  font-style: italic;
+  color: #ff7f27;
+  font-weight: 500;
+}

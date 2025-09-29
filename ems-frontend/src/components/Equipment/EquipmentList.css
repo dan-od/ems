@@ -1,0 +1,82 @@
+/* Equipment List Styles */
+.equipment-list {
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .equipment-list h3 {
+    color: #FF7F00;
+    margin-bottom: 20px;
+  }
+  
+  .table-responsive {
+    overflow-x: auto;
+  }
+  
+  .equipment-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .equipment-table th, 
+  .equipment-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .equipment-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+  }
+  
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 500;
+  }
+  
+  .status-badge.active {
+    background-color: #e6f7ee;
+    color: #28a745;
+  }
+  
+  .status-badge.inactive {
+    background-color: #feeae9;
+    color: #dc3545;
+  }
+  
+  .loading-indicator {
+    text-align: center;
+    padding: 20px;
+    color: #FF7F00;
+  }
+  
+  .error-message {
+    color: #dc3545;
+    padding: 10px;
+    background: #feeae9;
+    border-radius: 4px;
+  }
+  
+  .no-data {
+    text-align: center;
+    color: #6c757d;
+  }
+
+  .equipment-list-container {
+    max-height: 500px;  /* set desired max height */
+    overflow-y: auto;   /* enable scrolling within the container */
+    position: relative; /* needed for sticky to work in some browsers */
+  }
+  
+  .equipment-table thead th {
+    position: sticky;
+    top: 0; 
+    background-color: #f8f9fa; /* match your header color */
+    z-index: 2;               /* ensure the header is above row cells */
+  }
+  

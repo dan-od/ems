@@ -1,0 +1,22 @@
+/* public/fonts/general-sans.css */
+
+@font-face {
+    font-family: 'General Sans';
+    src: url('./GeneralSans-Regular.woff2') format('woff2'),
+         url('./GeneralSans-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  @font-face {
+    font-family: 'General Sans';
+    src: url('./GeneralSans-Bold.woff2') format('woff2'),
+         url('./GeneralSans-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  /* You can add more weights/styles here if needed. */
+  
