@@ -11,7 +11,7 @@ const Reports = () => {
     type: ''
   });
 
-  // API base URL
+  const userRole = localStorage.getItem('userRole');
   const API_BASE_URL = 'http://localhost:3001';
 
   useEffect(() => {
@@ -23,20 +23,23 @@ const Reports = () => {
       setLoading(true);
       setError(null);
       
-      // Get token from localStorage
       const token = localStorage.getItem('token');
       
       if (!token) {
         throw new Error('You must be logged in to view reports');
       }
+
+      // Managers use department-activity endpoint, admins use regular reports
+      const endpoint = (userRole === 'manager') 
+        ? '/api/reports/department-activity'
+        : '/api/reports/filter';
       
       const queryParams = new URLSearchParams(filterParams).toString();
-      const url = filterParams.startDate || filterParams.endDate || filterParams.type
-        ? `${API_BASE_URL}/api/reports/filter?${queryParams}`
-        : `${API_BASE_URL}/api/reports`;
+      const url = queryParams 
+        ? `${API_BASE_URL}${endpoint}?${queryParams}`
+        : `${API_BASE_URL}${endpoint}`;
       
       console.log('Fetching reports from:', url);
-      console.log('Using token:', token ? 'Token exists' : 'No token');
       
       const response = await fetch(url, {
         credentials: 'include',
@@ -51,8 +54,6 @@ const Reports = () => {
         if (response.status === 401) {
           throw new Error('Please log in to view reports');
         }
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
         throw new Error(`Failed to fetch reports: ${response.status}`);
       }
 
@@ -80,11 +81,14 @@ const Reports = () => {
     fetchReports(filters);
   };
 
-  const handleDebug = () => {
-    console.log('Token:', localStorage.getItem('token'));
-    console.log('User Role:', localStorage.getItem('userRole'));
-    console.log('User ID:', localStorage.getItem('userId'));
-    console.log('User Name:', localStorage.getItem('userName'));
+  const getActivityBadgeClass = (activityType) => {
+    switch (activityType?.toLowerCase()) {
+      case 'approval': return 'completed';
+      case 'rejection': return 'failed';
+      case 'transfer received': return 'pending';
+      case 'transfer sent': return 'pending';
+      default: return '';
+    }
   };
 
   if (loading) return <div className="reports-loading">Loading...</div>;
@@ -92,11 +96,9 @@ const Reports = () => {
 
   return (
     <div className="reports-container">
-      <h1 className="reports-title">Reports & Logs</h1>
-      
-      <div className="reports-actions">
-        <button onClick={handleDebug} className="debug-button">Debug Info</button>
-      </div>
+      <h1 className="reports-title">
+        {userRole === 'manager' ? 'Department Activity Log' : 'Reports & Logs'}
+      </h1>
       
       <form className="reports-filters" onSubmit={handleFilterSubmit}>
         <input 
@@ -105,6 +107,7 @@ const Reports = () => {
           className="date-filter"
           value={filters.startDate}
           onChange={handleFilterChange}
+          placeholder="Start Date"
         />
         <input 
           type="date" 
@@ -112,47 +115,68 @@ const Reports = () => {
           className="date-filter"
           value={filters.endDate}
           onChange={handleFilterChange}
+          placeholder="End Date"
         />
-        <select 
-          name="type"
-          className="type-filter"
-          value={filters.type}
-          onChange={handleFilterChange}
-        >
-          <option value="">All Types</option>
-          <option value="equipment">Equipment</option>
-          <option value="maintenance">Maintenance</option>
-          <option value="user">User Activity</option>
-        </select>
+        {userRole === 'manager' && (
+          <select 
+            name="type"
+            className="type-filter"
+            value={filters.type}
+            onChange={handleFilterChange}
+          >
+            <option value="">All Types</option>
+            <option value="ppe">PPE</option>
+            <option value="material">Material</option>
+            <option value="equipment">Equipment</option>
+            <option value="transport">Transport</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        )}
         <button type="submit" className="filter-button">Apply Filters</button>
       </form>
 
       <div className="reports-table-container">
         {reports.length === 0 ? (
-          <div className="no-reports">No reports found</div>
+          <div className="no-reports">No activity found</div>
         ) : (
           <table className="reports-table">
             <thead>
               <tr>
                 <th>Date</th>
+                {userRole === 'manager' && <th>Activity</th>}
                 <th>Type</th>
-                <th>Description</th>
-                <th>User</th>
-                <th>Status</th>
+                <th>Subject</th>
+                <th>Requested By</th>
+                <th>Action By</th>
+                {userRole === 'manager' && <th>Origin/Target Dept</th>}
+                <th>Notes</th>
               </tr>
             </thead>
             <tbody>
-              {reports.map((report) => (
-                <tr key={report.id}>
+              {reports.map((report, index) => (
+                <tr key={report.request_id || index}>
                   <td>{new Date(report.date).toLocaleDateString()}</td>
+                  {userRole === 'manager' && (
+                    <td>
+                      <span className={`status-badge ${getActivityBadgeClass(report.activity_type)}`}>
+                        {report.activity_type}
+                      </span>
+                    </td>
+                  )}
                   <td>{report.type}</td>
-                  <td>{report.description}</td>
-                  <td>{report.user}</td>
-                  <td>
-                    <span className={`status-badge ${report.status.toLowerCase()}`}>
-                      {report.status}
-                    </span>
-                  </td>
+                  <td>{report.subject}</td>
+                  <td>{report.requested_by}</td>
+                  <td>{report.action_by}</td>
+                  {userRole === 'manager' && (
+                    <td>
+                      {report.activity_type?.includes('Transfer') && (
+                        <small>
+                          {report.origin_department} → {report.target_department}
+                        </small>
+                      )}
+                    </td>
+                  )}
+                  <td><small>{report.notes || '—'}</small></td>
                 </tr>
               ))}
             </tbody>
@@ -163,4 +187,4 @@ const Reports = () => {
   );
 };
 
-export default Reports; 
+export default Reports;

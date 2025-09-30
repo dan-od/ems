@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
-import './Requests.css';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 
 const ManagerRequests = () => {
   const [requests, setRequests] = useState([]);
@@ -10,7 +11,7 @@ const ManagerRequests = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [notes, setNotes] = useState('');
-  const [error, setError] = useState('');  // ✅ ADD THIS LINE
+  const [error, setError] = useState('');
 
   const userRole = localStorage.getItem('userRole') || '';
 
@@ -28,6 +29,15 @@ const ManagerRequests = () => {
     }
   }, [userRole, selectedDept]);
 
+  // Auto-refresh every 30 seconds
+  useAutoRefresh(() => {
+    if (userRole === 'admin' && selectedDept) {
+      fetchDeptRequests(selectedDept);
+    } else if (userRole === 'manager') {
+      fetchDeptRequests();
+    }
+  }, 30000, [userRole, selectedDept]);
+
   const fetchDepartments = async () => {
     try {
       const { data } = await api.get('/departments');
@@ -39,7 +49,6 @@ const ManagerRequests = () => {
 
   const fetchDeptRequests = async (deptId) => {
     try {
-      // ✅ CORRECT URL
       let url = '/requests/department/requests';
       if (deptId) {
         url += `?deptId=${deptId}`;
@@ -54,8 +63,6 @@ const ManagerRequests = () => {
       setRequests([]);
     }
   };
-
-  // ... rest of your handlers (handleApprove, handleReject, handleTransfer, loadTransferOptions)
 
   const handleApprove = async (requestId) => {
     if (!window.confirm('Are you sure you want to approve this request?')) return;
@@ -160,7 +167,6 @@ const ManagerRequests = () => {
         ) : (
           requests.map((request) => (
             <div key={request.id} className="bg-white shadow rounded-xl p-6 space-y-4">
-              {/* Request card UI - keep your existing structure */}
               <div className="flex justify-between items-center border-b pb-2">
                 <h3>{request.subject}</h3>
                 <span className={`priority-badge ${request.priority?.toLowerCase()}`}>

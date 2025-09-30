@@ -4,8 +4,8 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import logo from '../../assets/wfsllogo.png';
 import './Dashboard.css';
-
 import { equipmentService } from '../../services/api';
+import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -24,28 +24,32 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data } = await equipmentService.getStats();
+      setStats(data);
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+      setError('Failed to load statistics');
+      setStats({
+        available: 0,
+        maintenance: 0,
+        retired: 0,
+        pending: 0,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const { data } = await equipmentService.getStats();
-        setStats(data);
-      } catch (err) {
-        console.error('Failed to fetch stats:', err);
-        setError('Failed to load statistics');
-        setStats({
-          available: 0,
-          maintenance: 0,
-          retired: 0,
-          pending: 0,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchStats();
   }, []);
+
+  // Auto-refresh stats every 30 seconds
+  useAutoRefresh(fetchStats, 30000);
 
   const handleLogout = async () => {
     try {

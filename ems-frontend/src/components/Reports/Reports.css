@@ -134,3 +134,23 @@
   background-color: #f8f9fa;
   border-radius: 8px;
 } 
+
+.status-badge.completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge.failed {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge.pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.reports-table td small {
+  color: #666;
+  font-size: 0.85em;
+}
