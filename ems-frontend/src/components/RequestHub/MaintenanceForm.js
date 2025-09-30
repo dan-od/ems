@@ -36,7 +36,7 @@ export default function MaintenanceForm() {
         description: formData.issue_description,
         lines: [
             {
-            equipment_id: formData.equipment_id,
+            item_name: `Maintenance: Equipment ${formData.equipment_id}`,
             issue: formData.issue_description,
             location: formData.location,
             contact_person: formData.contact_person,
@@ -46,7 +46,7 @@ export default function MaintenanceForm() {
         ]
         });
         setMessage("✅ Maintenance request submitted successfully!");
-        setTimeout(() => navigate("/requests"), 2000);
+        setTimeout(() => navigate("/dashboard/my-requests"), 2000);
     } catch (err) {
         console.error(err);
         setMessage("❌ Failed to submit request: " + (err.response?.data?.error || err.message));

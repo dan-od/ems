@@ -36,7 +36,8 @@ export default function TransportForm() {
         subject: `Transport Request: ${formData.vehicle_type}`,
         description: `Transport from ${formData.pickup_location} to ${formData.dropoff_location}`,
         lines: [
-            {
+          {
+            item_name: `${formData.vehicle_type} - ${formData.pickup_location} to ${formData.dropoff_location}`,  // Add this
             vehicle_type: formData.vehicle_type,
             pickup: formData.pickup_location,
             dropoff: formData.dropoff_location,
@@ -45,11 +46,11 @@ export default function TransportForm() {
             cargo: formData.cargo_description,
             special: formData.special_requirements,
             quantity: 1
-            }
+          }
         ]
         });
         setMessage("✅ Transport request submitted successfully!");
-        setTimeout(() => navigate("/requests"), 2000);
+        setTimeout(() => navigate("/dashobard/my-requests"), 2000);
     } catch (err) {
         console.error(err);
         setMessage("❌ Failed to submit request: " + (err.response?.data?.error || err.message));
