@@ -22,13 +22,13 @@ export default function PPEForm() {
         subject: `PPE Request: ${form.item}`,
         description: `Request for ${form.quantity} units of ${form.item}`,
         lines: [{
-          name: form.item,
+          item_name: form.item,  // ✅ CHANGED FROM "name" TO "item_name"
           quantity: Number(form.quantity) || 1,
         }],
       });
       setMessage("✅ PPE request submitted successfully!");
       setForm({ item: "", quantity: 1, priority: "Medium" });
-      setTimeout(() => navigate("/requests"), 2000);
+      setTimeout(() => navigate("/dashboard/my-requests"), 2000);
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to submit request: " + (err.response?.data?.error || err.message));
@@ -85,7 +85,7 @@ export default function PPEForm() {
           <div className="flex gap-4">
             <button
               type="button"
-              onClick={() => navigate("/requests")}
+              onClick={() => navigate("/dashboard/requests")}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
               Cancel

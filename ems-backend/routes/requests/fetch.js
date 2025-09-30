@@ -3,7 +3,9 @@ const { authenticateJWT } = require('../../middleware/auth');
 const pool = require('../../config/db');
 const router = express.Router();
 
-// Get all requests (with optional ?type= filter) - FIXED PATH
+// ----------------------
+// GET all requests (with optional ?type= filter)
+// ----------------------
 router.get('/list', authenticateJWT(), async (req, res) => {
   const { type } = req.query;
   const user = req.user;
@@ -37,10 +39,17 @@ router.get('/list', authenticateJWT(), async (req, res) => {
   }
 });
 
-// Get request by ID - FIXED PATH (already good, but keeping for consistency)
+// ----------------------
+// GET request by ID (validated as integer)
+// ----------------------
 router.get('/:id', authenticateJWT(), async (req, res) => {
+  const requestId = parseInt(req.params.id, 10);
+
+  if (isNaN(requestId)) {
+    return res.status(400).json({ error: 'Request ID must be a number' });
+  }
+
   try {
-    const requestId = req.params.id;
     const { rows } = await pool.query(
       `SELECT r.*, u1.name as requested_by_name, u2.name as approved_by_name,
               CASE WHEN r.is_new_equipment THEN r.new_equipment_name ELSE e.name END as display_name
@@ -53,6 +62,7 @@ router.get('/:id', authenticateJWT(), async (req, res) => {
     );
 
     if (!rows.length) return res.status(404).json({ error: 'Request not found' });
+
     const request = rows[0];
 
     // Role restrictions
@@ -74,7 +84,9 @@ router.get('/:id', authenticateJWT(), async (req, res) => {
   }
 });
 
-// Dashboard pending requests - FIXED PATH
+// ----------------------
+// GET pending requests for dashboard
+// ----------------------
 router.get('/dashboard/pending', authenticateJWT(), async (req, res) => {
   try {
     const columnCheck = await pool.query(`
@@ -85,7 +97,7 @@ router.get('/dashboard/pending', authenticateJWT(), async (req, res) => {
     `);
     const hasNewEquipmentColumn = columnCheck.rows.length > 0;
 
-    let query = `
+    const query = `
       SELECT 
         r.id,
         r.subject,

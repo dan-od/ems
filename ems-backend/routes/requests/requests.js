@@ -1,6 +1,6 @@
 const express = require('express');
-const { authenticateJWT, checkRole } = require('../middleware/auth');
-const pool = require('../config/db');
+const { authenticateJWT, checkRole } = require('../../middleware/auth');
+const pool = require('../../config/db');
 const router = express.Router();
 
 // Create a unified request (handles PPE, Material, Equipment, Transport, Maintenance)

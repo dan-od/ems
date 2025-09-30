@@ -29,7 +29,7 @@ router.get('/my/list', authenticateJWT(), async (req, res) => {
       LEFT JOIN equipment e ON r.equipment_id = e.id
       WHERE r.requested_by = $1
       ORDER BY r.created_at DESC
-    `, [req.user.id]);
+    `, [req.user.id])
 
     res.json(rows);
   } catch (err) {

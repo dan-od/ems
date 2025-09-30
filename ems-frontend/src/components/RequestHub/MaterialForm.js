@@ -1,7 +1,9 @@
 import { useState } from "react";
 import api from "../../services/api";
+import { useNavigate } from "react-router-dom";
 
 export default function MaterialForm() {
+  const navigate = useNavigate();
   const [items, setItems] = useState([{ name: "", quantity: 1 }]);
   const [priority, setPriority] = useState("Medium");
   const [loading, setLoading] = useState(false);
@@ -28,16 +30,19 @@ export default function MaterialForm() {
       await api.post("/requests", {
         request_type: "material",
         priority,
+        subject: `Material Request - ${items.length} item(s)`,
+        description: items.map(it => `${it.name} (${it.quantity})`).join(', '),
         lines: items.map((it) => ({
-          name: it.name,
-          quantity: Number(it.quantity) || 0,
+          item_name: it.name,  // ✅ Changed from "name" to "item_name"
+          quantity: Number(it.quantity) || 1,
         })),
       });
       setMessage("✅ Material request submitted successfully!");
       setItems([{ name: "", quantity: 1 }]);
+      setTimeout(() => navigate("/dashboard/my-requests"), 2000);
     } catch (err) {
       console.error(err);
-      setMessage("❌ Failed to submit request");
+      setMessage("❌ Failed to submit request: " + (err.response?.data?.error || err.message));
     } finally {
       setLoading(false);
     }
@@ -70,7 +75,7 @@ export default function MaterialForm() {
                 <button
                   type="button"
                   onClick={() => removeItem(index)}
-                  className="bg-wfsl-orange text-white px-3 py-1 rounded hover:bg-wfsl-orangeDark"
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                 >
                   Remove
                 </button>
@@ -81,13 +86,13 @@ export default function MaterialForm() {
           <button
             type="button"
             onClick={addItem}
-            className="bg-wfsl-orange text-white px-4 py-2 rounded hover:bg-wfsl-orangeDark"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           >
             + Add another item
           </button>
 
           <div>
-            <label className="block font-medium">Priority</label>
+            <label className="block font-medium mb-1">Priority</label>
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
@@ -100,16 +105,25 @@ export default function MaterialForm() {
             </select>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-wfsl-orange text-white py-2 rounded hover:bg-wfsl-orangeDark transition"
-          >
-            {loading ? "Submitting..." : "Submit Request"}
-          </button>
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard/requests")}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+            >
+              {loading ? "Submitting..." : "Submit Request"}
+            </button>
+          </div>
         </form>
 
-        {message && <p className="mt-4">{message}</p>}
+        {message && <p className="mt-4 text-center">{message}</p>}
       </div>
     </div>
   );

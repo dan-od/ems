@@ -6,7 +6,10 @@ const pool = require('./config/db');
 const authRoutes = require('./routes/auth');
 const equipmentRoutes = require('./routes/equipment');
 const assignmentRoutes = require('./routes/assignments');
-const requestRoutes = require('./routes/requests');
+
+// ✅ ONLY CHANGE: Load modular requests folder instead of monolithic file
+const requestRoutes = require('./routes/requests/index');  // ← Changed from './routes/requests'
+
 const reportsRoutes = require('./routes/reports');
 const userRoutes = require('./routes/user');
 const departmentRoutes = require('./routes/departments');
@@ -23,53 +26,51 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Test DB connection (optional but recommended)
+// Test DB connection
 pool.query('SELECT NOW()', (err) => {
   if (err) console.error('❌ DB connection error:', err);
   else console.log('✅ DB connected');
 });
 
-
-// Simple test route (defined before other routes)
-app.get('/api/wells', (req, res) => {
-  res.json({ message: "This is the wells endpoint!" });
+// Test route
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
-// Router middlewares - ADD CONSOLE LOGS
-console.log('🔹 Starting route registration...');
+// Router middlewares
+console.log('🔹 Registering routes...');
 
 app.use('/api/auth', authRoutes);
-console.log('✅ Auth routes registered');
+console.log('  ✅ Auth');
 
 app.use('/api/equipment', equipmentRoutes);
-console.log('✅ Equipment routes registered');
+console.log('  ✅ Equipment');
 
 app.use('/api/assignments', assignmentRoutes);
-console.log('✅ Assignment routes registered');
+console.log('  ✅ Assignments');
 
 app.use('/api/requests', requestRoutes);
-console.log('✅ Request routes registered');
+console.log('  ✅ Requests');
 
 app.use('/api/reports', reportsRoutes);
-console.log('✅ Reports routes registered');
+console.log('  ✅ Reports');
 
 app.use('/api/users', userRoutes);
-console.log('✅ User routes registered'); // This should show up
+console.log('  ✅ Users');
 
 app.use('/api/issues', require('./routes/issues'));
-console.log('✅ Issues routes registered');
+console.log('  ✅ Issues');
 
 app.use('/api/returns', require('./routes/returns'));
-console.log('✅ Returns routes registered');
+console.log('  ✅ Returns');
 
 app.use('/api/departments', departmentRoutes);
-console.log('✅ Department routes registered');
+console.log('  ✅ Departments');
 
 app.use('/api/maintenance-requests', maintenanceRequestRoutes);
-console.log('✅ Department maintenance registered');
+console.log('  ✅ Maintenance');
 
-
-console.log('🔹 All routes registered successfully');
+console.log('✅ All routes registered\n');
 
 // Error handling
 app.use((err, req, res, next) => {
@@ -77,6 +78,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something broke!' });
 });
 
-// Start server (ONLY ONCE)
+// Start server
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
