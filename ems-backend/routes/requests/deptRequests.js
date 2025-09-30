@@ -4,8 +4,7 @@ const pool = require('../../config/db');
 const router = express.Router();
 
 // ==================== DEPARTMENT REQUEST QUERIES ====================
-// These routes are prefixed with /department in the main index
-// So /requests/department/requests becomes available
+// These routes are directly at /requests/department/...
 
 /**
  * Get requests for a specific department
@@ -13,7 +12,7 @@ const router = express.Router();
  * @query deptId (optional, admin only)
  * @access Manager, Admin
  */
-router.get('/requests', authenticateJWT(), checkRole(['manager', 'admin']), async (req, res) => {
+router.get('/department/requests', authenticateJWT(), checkRole(['manager', 'admin']), async (req, res) => {
   console.log('\n📋 [DEPT REQUESTS] Fetching department requests');
   console.log('👤 User:', { id: req.user.id, role: req.user.role, dept: req.user.department_id });
 
@@ -82,7 +81,7 @@ router.get('/requests', authenticateJWT(), checkRole(['manager', 'admin']), asyn
  * @query deptId (optional, admin only)
  * @access Manager, Admin
  */
-router.get('/all', authenticateJWT(), checkRole(['manager', 'admin']), async (req, res) => {
+router.get('/department/all', authenticateJWT(), checkRole(['manager', 'admin']), async (req, res) => {
   console.log('\n📚 [DEPT ALL REQUESTS] Fetching all requests (including history)');
 
   try {
