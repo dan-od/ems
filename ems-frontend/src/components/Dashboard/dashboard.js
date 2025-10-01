@@ -1,19 +1,15 @@
-// src/components/Dashboard/dashboard.js
 import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { authService, equipmentService } from '../../services/api';
 import logo from '../../assets/wfsllogo.png';
-import './Dashboard.css';
-import { equipmentService } from '../../services/api';
 import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Get user info from localStorage
   const [userName] = useState(localStorage.getItem('userName') || 'User');
   const [userRole] = useState(localStorage.getItem('userRole') || '');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [stats, setStats] = useState({
     available: 0,
@@ -33,12 +29,7 @@ const Dashboard = () => {
     } catch (err) {
       console.error('Failed to fetch stats:', err);
       setError('Failed to load statistics');
-      setStats({
-        available: 0,
-        maintenance: 0,
-        retired: 0,
-        pending: 0,
-      });
+      setStats({ available: 0, maintenance: 0, retired: 0, pending: 0 });
     } finally {
       setLoading(false);
     }
@@ -48,56 +39,73 @@ const Dashboard = () => {
     fetchStats();
   }, []);
 
-  // Auto-refresh stats every 30 seconds
   useAutoRefresh(fetchStats, 30000);
 
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:3001/api/auth/logout', null, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      });
+      await authService.logout();
     } catch (error) {
       console.error('Logout API error:', error);
     } finally {
-      // Clear session storage
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('userName');
+      localStorage.clear();
       navigate('/', { replace: true });
     }
   };
 
-  // Function to check if a route is active
   const isActive = (path) => {
-    return (
-      location.pathname === path ||
-      location.pathname.startsWith(`${path}/`)
-    );
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
   return (
-    <div className="dashboard-layout">
+    <div className="flex h-screen bg-gray-50">
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <img
-            src={logo}
-            alt="Well Fluid Services Limited"
-            className="company-logo"
-          />
-          <div className="user-info">
-            <div className="user-greeting">Hi, {userName}</div>
+      <aside className={`
+        fixed lg:static inset-y-0 left-0 z-50
+        w-64 bg-white shadow-lg
+        transform transition-transform duration-300 ease-in-out
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        flex flex-col
+      `}>
+        {/* Header */}
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between">
+            <img src={logo} alt="WFSL" className="h-12" />
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
+          <div className="mt-2 text-sm text-gray-600">Hi, {userName}</div>
         </div>
 
-        <nav className="menu">
-          <ul>
-            {/* Always visible */}
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto p-4">
+          <ul className="space-y-2">
             <li>
               <Link
                 to="/dashboard"
-                className={isActive('/dashboard') ? 'active' : ''}
+                className={`block px-4 py-3 rounded-lg transition-colors ${
+                  isActive('/dashboard') && location.pathname === '/dashboard'
+                    ? 'bg-orange-500 text-white'
+                    : 'hover:bg-gray-100'
+                }`}
               >
                 Dashboard
               </Link>
@@ -105,7 +113,9 @@ const Dashboard = () => {
             <li>
               <Link
                 to="/dashboard/all-equipment"
-                className={isActive('/dashboard/all-equipment') ? 'active' : ''}
+                className={`block px-4 py-3 rounded-lg transition-colors ${
+                  isActive('/dashboard/all-equipment') ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'
+                }`}
               >
                 All Equipment
               </Link>
@@ -113,7 +123,9 @@ const Dashboard = () => {
             <li>
               <Link
                 to="/dashboard/under-maintenance"
-                className={isActive('/dashboard/under-maintenance') ? 'active' : ''}
+                className={`block px-4 py-3 rounded-lg transition-colors ${
+                  isActive('/dashboard/under-maintenance') ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'
+                }`}
               >
                 Under Maintenance
               </Link>
@@ -121,16 +133,19 @@ const Dashboard = () => {
             <li>
               <Link
                 to="/dashboard/requests"
-                className={isActive('/dashboard/requests') ? 'active' : ''}
+                className={`block px-4 py-3 rounded-lg transition-colors ${
+                  isActive('/dashboard/requests') ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'
+                }`}
               >
                 Request Hub
               </Link>
             </li>
-
             <li>
               <Link
                 to="/dashboard/my-requests"
-                className={isActive('/dashboard/my-requests') ? 'active' : ''}
+                className={`block px-4 py-3 rounded-lg transition-colors ${
+                  isActive('/dashboard/my-requests') ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'
+                }`}
               >
                 My Requests
               </Link>
@@ -140,7 +155,9 @@ const Dashboard = () => {
               <li>
                 <Link
                   to="/dashboard/manager-requests"
-                  className={isActive('/dashboard/manager-requests') ? 'active' : ''}
+                  className={`block px-4 py-3 rounded-lg transition-colors ${
+                    isActive('/dashboard/manager-requests') ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'
+                  }`}
                 >
                   Dept Requests
                 </Link>
@@ -150,7 +167,9 @@ const Dashboard = () => {
             <li>
               <Link
                 to="/dashboard/reports"
-                className={isActive('/dashboard/reports') ? 'active' : ''}
+                className={`block px-4 py-3 rounded-lg transition-colors ${
+                  isActive('/dashboard/reports') ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'
+                }`}
               >
                 Reports / Logs
               </Link>
@@ -161,7 +180,9 @@ const Dashboard = () => {
                 <li>
                   <Link
                     to="/dashboard/users"
-                    className={isActive('/dashboard/users') ? 'active' : ''}
+                    className={`block px-4 py-3 rounded-lg transition-colors ${
+                      isActive('/dashboard/users') ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'
+                    }`}
                   >
                     Users
                   </Link>
@@ -169,7 +190,9 @@ const Dashboard = () => {
                 <li>
                   <Link
                     to="/dashboard/add-user"
-                    className={isActive('/dashboard/add-user') ? 'active' : ''}
+                    className={`block px-4 py-3 rounded-lg transition-colors ${
+                      isActive('/dashboard/add-user') ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'
+                    }`}
                   >
                     Add New User
                   </Link>
@@ -179,33 +202,60 @@ const Dashboard = () => {
           </ul>
         </nav>
 
-        <div className="logout-section">
-          <button onClick={handleLogout}>LOGOUT</button>
+        {/* Logout Button */}
+        <div className="p-4 border-t">
+          <button
+            onClick={handleLogout}
+            className="w-full px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+          >
+            LOGOUT
+          </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="main-content">
-        <div className="stats-cards">
-          <div className="card">
-            <div className="card-value">{stats.available}</div>
-            <div className="card-label">Available</div>
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile Header with Hamburger */}
+        <header className="lg:hidden bg-white shadow-sm p-4 flex items-center justify-between">
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="p-2 rounded-lg hover:bg-gray-100"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <span className="font-semibold">WFSL EMRS</span>
+          <div className="w-10" /> {/* Spacer for centering */}
+        </header>
+
+        {/* Stats Cards */}
+        <div className="bg-white shadow-sm p-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white border rounded-lg p-4 text-center">
+              <div className="text-3xl lg:text-4xl font-bold text-orange-500">{stats.available}</div>
+              <div className="text-sm text-gray-600 mt-1">Available</div>
+            </div>
+            <div className="bg-white border rounded-lg p-4 text-center">
+              <div className="text-3xl lg:text-4xl font-bold text-orange-500">{stats.maintenance}</div>
+              <div className="text-sm text-gray-600 mt-1">Maintenance</div>
+            </div>
+            <div className="bg-white border rounded-lg p-4 text-center">
+              <div className="text-3xl lg:text-4xl font-bold text-orange-500">{stats.retired}</div>
+              <div className="text-sm text-gray-600 mt-1">Retired</div>
+            </div>
+            <div className="bg-white border rounded-lg p-4 text-center">
+              <div className="text-3xl lg:text-4xl font-bold text-orange-500">{stats.pending}</div>
+              <div className="text-sm text-gray-600 mt-1">Pending Requests</div>
+            </div>
           </div>
-          <div className="card">
-            <div className="card-value">{stats.maintenance}</div>
-            <div className="card-label">Maintenance</div>
-          </div>
-          <div className="card">
-            <div className="card-value">{stats.retired}</div>
-            <div className="card-label">Retired</div>
-          </div>
-          <div className="card">
-            <div className="card-value">{stats.pending}</div>
-            <div className="card-label">Pending Requests</div>
-          </div>
+          {error && <div className="text-red-500 text-sm mt-2 text-center">{error}</div>}
         </div>
-        {error && <div className="error-message">{error}</div>}
-        <Outlet />
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

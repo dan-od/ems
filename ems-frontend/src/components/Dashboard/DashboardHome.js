@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import EquipmentTable from '../Equipment/EquipmentTable';
 import UserManagement from '../User/UserManagement';
+import { requestService } from '../../services/api';
 import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 import './Dashboard.css';
 
@@ -11,52 +12,21 @@ const DashboardHome = ({ userRole }) => {
 
   const fetchPendingRequests = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/requests/dashboard/pending', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Accept': 'application/json'
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch pending requests');
-      const raw = await response.json();
+      const { data } = await requestService.getPending();
 
-      // Normalize backend → frontend (handles old/new field names safely)
-      const data = (Array.isArray(raw) ? raw : []).map(r => {
-        const priority =
-          (r?.priority ?? r?.priority_level ?? r?.severity ?? '').toString();
+      const normalized = (Array.isArray(data) ? data : []).map(r => ({
+        id: r?.id ?? r?.request_id ?? crypto.randomUUID(),
+        equipmentName: r?.equipment_name ?? r?.equipmentName ?? 'New Equipment',
+        subject: r?.subject ?? r?.title ?? '—',
+        requestedByName: r?.requested_by_name ?? r?.requestedByName ?? 'Unknown',
+        priority: (r?.priority ?? r?.priority_level ?? '').toString(),
+        status: (r?.status ?? r?.request_status ?? 'in-progress').toString(),
+        createdAt: r?.created_at ?? r?.createdAt ?? new Date().toISOString(),
+      }));
 
-        const status =
-          (r?.status ?? r?.request_status ?? 'in-progress').toString();
-
-        return {
-          id: r?.id ?? r?.request_id ?? r?._id ?? crypto.randomUUID(),
-          equipmentName:
-            r?.equipment_name ??
-            r?.equipmentName ??
-            r?.equipment?.name ??
-            'New Equipment',
-          subject: r?.subject ?? r?.title ?? '—',
-          requestedByName:
-            r?.requested_by_name ??
-            r?.requestedByName ??
-            r?.requested_by ??
-            r?.requester?.name ??
-            'Unknown',
-          priority,
-          status,
-          createdAt:
-            r?.created_at ??
-            r?.createdAt ??
-            r?.created_on ??
-            r?.created_at_utc ??
-            r?.timestamp ??
-            new Date().toISOString(),
-        };
-      });
-
-      setPendingRequests(data);
+      setPendingRequests(normalized);
     } catch (err) {
-      setError(err.message || 'Something went wrong');
+      setError(err.message || 'Failed to load requests');
     } finally {
       setLoading(false);
     }
@@ -66,10 +36,8 @@ const DashboardHome = ({ userRole }) => {
     fetchPendingRequests();
   }, []);
 
-  // Auto-refresh every 30 seconds
   useAutoRefresh(fetchPendingRequests, 30000);
 
-  // UI helpers (defensive against null/undefined)
   const getPriorityBadgeClass = (priority) => {
     const p = (priority || '').toString().toLowerCase();
     switch (p) {

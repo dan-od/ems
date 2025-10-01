@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { authService } from '../../services/api';
 import './Login.css';
 import logo from '../../assets/wfsllogo.png';
-import { API_URL } from '../../config'; // ← ADD THIS LINE
-
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,13 +16,14 @@ const Login = () => {
       setError('Please fill in all fields');
       return;
     }
+    
     try {
-      // ← CHANGED THIS LINE - was 'http://localhost:3001/api/auth/login'
-      const res = await axios.post(`${API_URL}/api/auth/login`, { email, password });
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('userRole', res.data.user.role);
-      localStorage.setItem('userId', res.data.user.id);
-      localStorage.setItem('userName', res.data.user.name);
+      const { data } = await authService.login({ email, password });
+      
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userRole', data.user.role);
+      localStorage.setItem('userId', data.user.id);
+      localStorage.setItem('userName', data.user.name);
       navigate('/dashboard');
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Login failed';
@@ -35,8 +34,8 @@ const Login = () => {
   return (
     <div className="login-page">
       <div className="login-container">
-      <img src={logo} alt="Well Fluid Services Limited" className="company-logo" />
-      <h2>WFSL EMRS</h2>
+        <img src={logo} alt="Well Fluid Services Limited" className="company-logo" />
+        <h2>WFSL EMRS</h2>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleLogin}>
           <input

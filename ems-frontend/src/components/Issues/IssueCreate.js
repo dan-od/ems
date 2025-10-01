@@ -187,7 +187,7 @@ export default function IssueCreate() {
                         Load available
                       </button>
                       <span className="text-xs text-gray-500">
-                        (pulls `/assets?itemId={itemId}`)
+                        (pulls `/assets?itemId={ln.itemId}`)
                       </span>
                     </div>
 

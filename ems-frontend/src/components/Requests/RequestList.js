@@ -1,7 +1,7 @@
 // src/components/Requests/RequestList.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
+import { requestService } from '../../services/api';
 import './Requests.css';
 
 const RequestList = () => {
@@ -17,7 +17,7 @@ const RequestList = () => {
   const fetchMyRequests = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/requests/my-requests');
+      const { data } = await requestService.getMyRequests();
       setRequests(data);
     } catch (err) {
       console.error('Failed to fetch requests:', err);

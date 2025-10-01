@@ -229,7 +229,11 @@ const EquipmentForm = (props) => {
         </form>
         
         {/* Custom popup that appears instead of alert */}
-        {showPopup && <Popup message={popupMessage} />}
+        {showPopup && (
+            <div className="popup-overlay">
+              <div className="popup-message">{popupMessage}</div>
+            </div>
+          )}
       </div>
     </div>
   );
