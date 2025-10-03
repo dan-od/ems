@@ -151,3 +151,226 @@
   background-color: #6c757d;
   cursor: not-allowed;
 }
+
+
+/* Mobile Card Styles for Users */
+.users-cards-mobile {
+  display: none;
+}
+
+.users-table-desktop {
+  display: block;
+}
+
+@media (max-width: 1024px) {
+  /* Hide table on mobile */
+  .users-table-desktop {
+    display: none;
+  }
+
+  /* Show cards on mobile */
+  .users-cards-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .user-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid #e5e7eb;
+  }
+
+  .user-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .user-card-header h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+  }
+
+  .role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+
+  .role-badge.admin {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .role-badge.manager {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .role-badge.engineer {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .user-card-body {
+    margin-bottom: 1rem;
+  }
+
+  .user-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+  }
+
+  .user-detail strong {
+    color: #6b7280;
+  }
+
+  .user-detail span {
+    color: #111827;
+    font-weight: 500;
+  }
+
+  .card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .btn-edit,
+  .btn-delete,
+  .btn-save,
+  .btn-cancel {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+  }
+
+  .btn-edit {
+    background: #3b82f6;
+    color: white;
+  }
+
+  .btn-edit:hover {
+    background: #2563eb;
+  }
+
+  .btn-delete {
+    background: #ef4444;
+    color: white;
+  }
+
+  .btn-delete:hover {
+    background: #dc2626;
+  }
+
+  /* Edit Mode Styles */
+  .user-card-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .edit-field label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .edit-field input,
+  .edit-field select {
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+  }
+
+  .edit-field input:focus,
+  .edit-field select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .card-actions-edit {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .btn-save {
+    background: #10b981;
+    color: white;
+  }
+
+  .btn-save:hover {
+    background: #059669;
+  }
+
+  .btn-cancel {
+    background: #6b7280;
+    color: white;
+  }
+
+  .btn-cancel:hover {
+    background: #4b5563;
+  }
+
+  .no-users {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+  }
+}
+
+/* Action Buttons for Users Table */
+.users-table .action-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
+}
+
+.users-table .edit-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.users-table .edit-btn:hover {
+  background: #2563eb;
+}
+
+.users-table .delete-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.users-table .delete-btn:hover {
+  background: #dc2626;
+}

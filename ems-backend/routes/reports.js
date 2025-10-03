@@ -75,7 +75,7 @@ router.get('/filter', authenticateJWT(), async (req, res) => {
 });
 
 // Get department activity report for managers
-router.get('/department-activity', authenticateJWT(), checkRole(['manager', 'admin']), async (req, res) => {
+router.get('/department-activity', authenticateJWT(), checkRole(['manager', 'admin', 'staff']), async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
     let departmentId = req.user.department_id;

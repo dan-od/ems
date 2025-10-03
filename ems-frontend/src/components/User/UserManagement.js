@@ -125,6 +125,7 @@ const UserManagement = () => {
             <option value="admin">Admin</option>
             <option value="manager">Manager</option>
             <option value="engineer">Engineer</option>
+            <option value="staff">Staff</option>
           </select>
         </div>
         <button type="submit">Create User</button>
@@ -152,6 +153,7 @@ const UserManagement = () => {
                   <option value="admin">Admin</option>
                   <option value="manager">Manager</option>
                   <option value="engineer">Engineer</option>
+                  <option value="staff">Staff</option>
                 </select>
               </td>
               <td>

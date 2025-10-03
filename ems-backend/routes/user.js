@@ -24,6 +24,14 @@ router.post('/',
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
+        // Validate role
+      const validRoles = ['admin', 'manager', 'engineer', 'staff'];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ 
+          error: `Invalid role. Must be one of: ${validRoles.join(', ')}` 
+        });
+      }
+
       const hashedPassword = await bcrypt.hash(password, 12);
       console.log('✅ Password hashed successfully');
 

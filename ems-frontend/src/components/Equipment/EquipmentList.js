@@ -136,13 +136,13 @@ const EquipmentList = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(item)}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
+                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
-                      className="text-red-600 hover:text-red-800 font-medium"
+                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                     >
                       Delete
                     </button>
@@ -158,7 +158,6 @@ const EquipmentList = () => {
       <div className="lg:hidden space-y-4">
         {filteredEquipment.map((item) => (
           <div key={item.id} className="bg-white rounded-lg shadow p-4 space-y-3">
-            {/* Header */}
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h3 className="font-semibold text-lg">{item.name}</h3>
@@ -169,7 +168,6 @@ const EquipmentList = () => {
               </span>
             </div>
 
-            {/* Details */}
             <div className="text-sm">
               <div className="flex justify-between py-2 border-t">
                 <span className="text-gray-600">Last Maintained:</span>
@@ -181,7 +179,6 @@ const EquipmentList = () => {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex gap-2 pt-2">
               <button
                 onClick={() => handleEdit(item)}

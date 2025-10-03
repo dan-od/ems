@@ -285,8 +285,8 @@ router.get('/:id', authenticateJWT(), async (req, res) => {
       }
     }
 
-    // engineers can only see their own
-    if (req.user.role === 'engineer' && request.requested_by !== req.user.id) {
+    // engineers and staff can only see their own
+    if ((req.user.role === 'engineer' || req.user.role === 'staff') && request.requested_by !== req.user.id) {
       return res.status(403).json({ error: 'Not authorized to view this request' });
     }
 

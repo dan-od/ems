@@ -50,7 +50,7 @@ const RequestDetail = () => {
         <h1>Request Details</h1>
         <button 
           className="back-button"
-          onClick={() => navigate('/dashboard/requests')}
+          onClick={() => navigate('/dashboard/my-requests')}
         >
           Back to Requests
         </button>

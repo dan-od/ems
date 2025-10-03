@@ -33,8 +33,8 @@ function App() {
       {/* Public Route */}
       <Route path="/" element={<Login />} />
 
-      {/* Protected Dashboard */}
-      <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'engineer', 'user']} />}>
+      {/* Protected Dashboard  */}
+      <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'engineer', 'staff']} />}>
         <Route path="/dashboard" element={<Dashboard />}>
           {/* Default landing */}
           <Route index element={<DashboardHome />} />

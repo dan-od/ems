@@ -98,7 +98,8 @@ const AddUser = () => {
         <ul>
           <li><strong>Admin:</strong> Full system access, can manage all users and settings</li>
           <li><strong>Manager:</strong> Can manage equipment, requests, and view reports</li>
-          <li><strong>Engineer:</strong> Can view equipment and submit maintenance requests</li>
+          <li><strong>Engineer:</strong> Field operations - create requests for equipment, transport, PPE</li>
+          <li><strong>Staff:</strong> Office operations - create requests for admin needs, IT, supplies</li>
         </ul>
       </div>
 
@@ -171,6 +172,7 @@ const AddUser = () => {
             <option value="admin">Admin</option>
             <option value="manager">Manager</option>
             <option value="engineer">Engineer</option>
+            <option value="staff">Staff</option>
           </select>
         </div>
 

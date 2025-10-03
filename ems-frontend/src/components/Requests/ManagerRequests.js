@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
+import './ManagerRequests.css'; // Add this import
 
 const ManagerRequests = () => {
   const [requests, setRequests] = useState([]);
@@ -29,7 +30,6 @@ const ManagerRequests = () => {
     }
   }, [userRole, selectedDept]);
 
-  // Auto-refresh every 30 seconds
   useAutoRefresh(() => {
     if (userRole === 'admin' && selectedDept) {
       fetchDeptRequests(selectedDept);
@@ -133,18 +133,17 @@ const ManagerRequests = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="manager-requests-container">
       <div className="manager-header">
         <h1>Department Requests Management</h1>
         <p>Approve, reject, or transfer requests</p>
 
         {userRole === 'admin' && (
-          <div className="mb-4">
-            <label className="mr-2 font-semibold">Select Department:</label>
+          <div className="dept-selector">
+            <label>Select Department:</label>
             <select
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
-              className="border rounded p-2"
             >
               <option value="">-- choose dept --</option>
               {departments.map(d => (
@@ -155,7 +154,7 @@ const ManagerRequests = () => {
         )}
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <div className="error-alert">
             {error}
           </div>
         )}
@@ -163,11 +162,11 @@ const ManagerRequests = () => {
 
       <div className="requests-grid">
         {requests.length === 0 ? (
-          <p>No pending requests</p>
+          <p className="no-requests">No pending requests</p>
         ) : (
           requests.map((request) => (
-            <div key={request.id} className="bg-white shadow rounded-xl p-6 space-y-4">
-              <div className="flex justify-between items-center border-b pb-2">
+            <div key={request.id} className="request-card-manager">
+              <div className="request-card-header-manager">
                 <h3>{request.subject}</h3>
                 <span className={`priority-badge ${request.priority?.toLowerCase()}`}>
                   {request.priority}
@@ -175,41 +174,57 @@ const ManagerRequests = () => {
               </div>
 
               <div className="request-details">
-                <p><strong>Requested by:</strong> {request.requested_by_name}</p>
-                <p><strong>Date:</strong> {new Date(request.created_at).toLocaleDateString()}</p>
-                <p><strong>Department:</strong> {request.department_name}</p>
+                <div className="detail-row">
+                  <strong>Requested by:</strong> 
+                  <span>{request.requested_by_name}</span>
+                </div>
+                <div className="detail-row">
+                  <strong>Date:</strong> 
+                  <span>{new Date(request.created_at).toLocaleDateString()}</span>
+                </div>
+                <div className="detail-row">
+                  <strong>Department:</strong> 
+                  <span>{request.department_name}</span>
+                </div>
               </div>
 
-              <div className="flex gap-3 mt-4">
-                <button onClick={() => handleApprove(request.id)} disabled={actionLoading}
-                  className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700">
+              <div className="action-buttons">
+                <button 
+                  onClick={() => handleApprove(request.id)} 
+                  disabled={actionLoading}
+                  className="btn-approve"
+                >
                   Approve
                 </button>
-                <button onClick={() => setSelectedRequest(request.id)} disabled={actionLoading}
-                  className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">
+                <button 
+                  onClick={() => setSelectedRequest(request.id)} 
+                  disabled={actionLoading}
+                  className="btn-reject"
+                >
                   Reject
                 </button>
-                <button onClick={() => loadTransferOptions(request.id)} disabled={actionLoading}
-                  className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">
+                <button 
+                  onClick={() => loadTransferOptions(request.id)} 
+                  disabled={actionLoading}
+                  className="btn-transfer"
+                >
                   Transfer
                 </button>
               </div>
 
               {selectedRequest === request.id && (
-                <div className="action-form mt-4">
+                <div className="action-form">
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Enter reason..."
                     rows={3}
-                    className="w-full border rounded p-2"
                   />
-                  <div className="flex gap-2 mt-2">
+                  <div className="form-actions">
                     {transferOptions.length > 0 ? (
                       <>
                         <select
                           onChange={(e) => handleTransfer(request.id, e.target.value)}
-                          className="flex-1 border rounded p-2"
                         >
                           <option value="">-- Select Department --</option>
                           {transferOptions.map(dept => (
@@ -222,7 +237,7 @@ const ManagerRequests = () => {
                             setTransferOptions([]);
                             setNotes('');
                           }}
-                          className="px-4 py-2 bg-gray-300 rounded"
+                          className="btn-cancel"
                         >
                           Cancel
                         </button>
@@ -232,7 +247,7 @@ const ManagerRequests = () => {
                         <button
                           onClick={() => handleReject(request.id)}
                           disabled={!notes.trim()}
-                          className="px-4 py-2 bg-red-600 text-white rounded"
+                          className="btn-confirm-reject"
                         >
                           Confirm Reject
                         </button>
@@ -241,7 +256,7 @@ const ManagerRequests = () => {
                             setSelectedRequest(null);
                             setNotes('');
                           }}
-                          className="px-4 py-2 bg-gray-300 rounded"
+                          className="btn-cancel"
                         >
                           Cancel
                         </button>
