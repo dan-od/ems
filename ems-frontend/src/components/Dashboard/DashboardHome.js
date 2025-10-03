@@ -1,19 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import EquipmentTable from '../Equipment/EquipmentTable';
 import UserManagement from '../User/UserManagement';
-import { requestService } from '../../services/api';
+import { requestService, equipmentService } from '../../services/api';
 import { useAutoRefresh } from '../../hooks/useAutoRefresh';
-import './Dashboard.css';
 
 const DashboardHome = ({ userRole }) => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Add stats state
+  const [stats, setStats] = useState({
+    available: 0,
+    maintenance: 0,
+    retired: 0,
+    pending: 0,
+  });
+
+  // Fetch stats
+  const fetchStats = async () => {
+    try {
+      const { data } = await equipmentService.getStats();
+      setStats(data);
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+    }
+  };
 
   const fetchPendingRequests = async () => {
     try {
       const { data } = await requestService.getPending();
-
       const normalized = (Array.isArray(data) ? data : []).map(r => ({
         id: r?.id ?? r?.request_id ?? crypto.randomUUID(),
         equipmentName: r?.equipment_name ?? r?.equipmentName ?? 'New Equipment',
@@ -23,7 +39,6 @@ const DashboardHome = ({ userRole }) => {
         status: (r?.status ?? r?.request_status ?? 'in-progress').toString(),
         createdAt: r?.created_at ?? r?.createdAt ?? new Date().toISOString(),
       }));
-
       setPendingRequests(normalized);
     } catch (err) {
       setError(err.message || 'Failed to load requests');
@@ -33,19 +48,23 @@ const DashboardHome = ({ userRole }) => {
   };
 
   useEffect(() => {
+    fetchStats();
     fetchPendingRequests();
   }, []);
 
-  useAutoRefresh(fetchPendingRequests, 30000);
+  useAutoRefresh(() => {
+    fetchStats();
+    fetchPendingRequests();
+  }, 30000);
 
   const getPriorityBadgeClass = (priority) => {
     const p = (priority || '').toString().toLowerCase();
     switch (p) {
-      case 'urgent': return 'urgent';
-      case 'high': return 'high';
-      case 'medium': return 'medium';
-      case 'low': return 'low';
-      default: return 'in-progress';
+      case 'urgent': return 'bg-red-100 text-red-800';
+      case 'high': return 'bg-orange-100 text-orange-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'low': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -55,118 +74,108 @@ const DashboardHome = ({ userRole }) => {
       case 'approved':
       case 'open':
       case 'active':
-        return 'status-ok';
+        return 'bg-green-100 text-green-800';
       case 'pending':
       case 'in-progress':
       case 'review':
-        return 'status-warn';
+        return 'bg-yellow-100 text-yellow-800';
       case 'rejected':
       case 'closed':
       case 'error':
-        return 'status-bad';
+        return 'bg-red-100 text-red-800';
       default:
-        return 'status-neutral';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   return (
-    <div className="dashboard-home">
-      <header className="topbar">
-        <h1>DASHBOARD</h1>
-      </header>
-
-      <div className="action-row">
-        {(userRole === 'admin' || userRole === 'manager') && (
-          <div className="action-buttons">
-            <button className="action-btn">
-              <i className="fas fa-plus"></i> Add Equipment
-            </button>
-            <button className="action-btn">
-              <i className="fas fa-file-alt"></i> View All Logs
-            </button>
-            <button className="action-btn">
-              <i className="fas fa-tools"></i> Equipment Maintenance
-            </button>
-          </div>
-        )}
-        <div className="search-container">
-          <input
-            className="search-filter"
-            type="text"
-            placeholder="Search & Filter"
-            aria-label="Search and filter equipment"
-          />
+    <div className="space-y-6">
+      {/* Stats Cards - ONLY on Dashboard Home */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white border rounded-lg p-6 text-center shadow-sm">
+          <div className="text-4xl font-bold text-orange-500">{stats.available}</div>
+          <div className="text-sm text-gray-600 mt-2">Available</div>
+        </div>
+        <div className="bg-white border rounded-lg p-6 text-center shadow-sm">
+          <div className="text-4xl font-bold text-orange-500">{stats.maintenance}</div>
+          <div className="text-sm text-gray-600 mt-2">Maintenance</div>
+        </div>
+        <div className="bg-white border rounded-lg p-6 text-center shadow-sm">
+          <div className="text-4xl font-bold text-orange-500">{stats.retired}</div>
+          <div className="text-sm text-gray-600 mt-2">Retired</div>
+        </div>
+        <div className="bg-white border rounded-lg p-6 text-center shadow-sm">
+          <div className="text-4xl font-bold text-orange-500">{stats.pending}</div>
+          <div className="text-sm text-gray-600 mt-2">Pending Requests</div>
         </div>
       </div>
 
-      <div className="dashboard-content">
+      {/* Dashboard Title */}
+      <div>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">DASHBOARD</h1>
+      </div>
+
+      {/* Content Sections */}
+      <div className="space-y-6">
         {userRole === 'admin' ? (
-          <section className="panel user-management">
-            <h2>
-              <i className="fas fa-users"></i> User Management
-            </h2>
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">User Management</h2>
             <UserManagement />
-          </section>
+          </div>
         ) : (
-          <section className="panel recent-requests">
-            <h2>
-              <i className="fas fa-clipboard-list"></i> Recent Requests
-            </h2>
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Recent Requests</h2>
             {loading ? (
-              <div className="loading-indicator">
-                <i className="fas fa-spinner fa-spin"></i> Loading requests...
-              </div>
+              <div className="text-center py-8 text-gray-500">Loading requests...</div>
             ) : error ? (
-              <div className="error-message">
-                <i className="fas fa-exclamation-circle"></i> {error}
-              </div>
+              <div className="text-center py-8 text-red-500">{error}</div>
             ) : (pendingRequests ?? []).length === 0 ? (
-              <p className="no-requests">No pending requests at the moment</p>
+              <p className="text-center py-8 text-gray-500">No pending requests</p>
             ) : (
-              <div className="table-responsive">
-                <table>
-                  <thead>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <th>Equipment</th>
-                      <th>Subject</th>
-                      <th>Requested By</th>
-                      <th>Priority</th>
-                      <th>Status</th>
-                      <th>Date</th>
+                      <th className="px-4 py-3 text-left">Equipment</th>
+                      <th className="px-4 py-3 text-left hidden lg:table-cell">Subject</th>
+                      <th className="px-4 py-3 text-left hidden md:table-cell">Requested By</th>
+                      <th className="px-4 py-3 text-left">Priority</th>
+                      <th className="px-4 py-3 text-left">Status</th>
+                      <th className="px-4 py-3 text-left hidden lg:table-cell">Date</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y">
                     {pendingRequests.map(req => (
-                      <tr key={req.id}>
-                        <td>{req.equipmentName}</td>
-                        <td>{req.subject}</td>
-                        <td>{req.requestedByName}</td>
-                        <td>
-                          <span className={`status-badge ${getPriorityBadgeClass(req.priority)}`}>
+                      <tr key={req.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3">{req.equipmentName}</td>
+                        <td className="px-4 py-3 hidden lg:table-cell">{req.subject}</td>
+                        <td className="px-4 py-3 hidden md:table-cell">{req.requestedByName}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityBadgeClass(req.priority)}`}>
                             {req.priority || '—'}
                           </span>
                         </td>
-                        <td>
-                          <span className={`status-badge ${getStatusBadgeClass(req.status)}`}>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(req.status)}`}>
                             {req.status || '—'}
                           </span>
                         </td>
-                        <td>{new Date(req.createdAt).toLocaleDateString()}</td>
+                        <td className="px-4 py-3 hidden lg:table-cell">
+                          {new Date(req.createdAt).toLocaleDateString()}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             )}
-          </section>
+          </div>
         )}
 
-        <section className="panel equipment-list">
-          <h2>
-            <i className="fas fa-boxes"></i> Equipment List
-          </h2>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">Equipment List</h2>
           <EquipmentTable />
-        </section>
+        </div>
       </div>
     </div>
   );
