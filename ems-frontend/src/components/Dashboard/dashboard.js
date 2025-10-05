@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { authService, equipmentService } from '../../services/api';
 import logo from '../../assets/wfsllogo.png';
-import './Dashboard.css'; // ← Make sure this is imported
+import './Dashboard.css';
 import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 
 const Dashboard = () => {
@@ -117,11 +117,21 @@ const Dashboard = () => {
               </li>
             )}
 
+            {/* System Reports/Logs (OLD - for maintenance logs, etc.) */}
             <li>
-              <Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}>
+              <Link to="/dashboard/logs" className={isActive('/dashboard/logs') ? 'active' : ''}>
                 Reports / Logs
               </Link>
             </li>
+
+            {/* Field Reports (NEW - for job completion reports) */}
+            {(userRole === 'engineer' || userRole === 'manager' || userRole === 'admin') && (
+              <li>
+                <Link to="/dashboard/field-reports" className={isActive('/dashboard/field-reports') ? 'active' : ''}>
+                  Field Reports
+                </Link>
+              </li>
+            )}
 
             {userRole === 'admin' && (
               <>

@@ -12,6 +12,10 @@ const validateEquipmentStatus = (req, res, next) => {
   next();
 };
 
+// ============================================================================
+// IMPORTANT: Specific routes MUST come BEFORE parameterized routes like /:id
+// ============================================================================
+
 // @desc    Get equipment stats
 router.get('/stats', authenticateJWT(), async (req, res) => {
   try {
@@ -39,6 +43,103 @@ router.get('/stats', authenticateJWT(), async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch stats', details: err.message });
   }
 });
+
+// ============================================================================
+// ENGINEER-SPECIFIC ENDPOINTS - MUST BE BEFORE /:id ROUTE
+// ============================================================================
+
+/**
+ * @route   GET /api/equipment/my-assigned
+ * @desc    Get equipment currently assigned to the logged-in engineer
+ * @access  Engineer, Admin
+ */
+router.get('/my-assigned', authenticateJWT(), async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    console.log(`📦 Fetching assigned equipment for user #${userId}`);
+
+    const { rows } = await pool.query(`
+      SELECT 
+        e.id,
+        e.name,
+        e.description,
+        e.status,
+        e.location as base_location,
+        ea.id as assignment_id,
+        ea.assigned_at,
+        ea.location as current_location,
+        ea.notes,
+        m.maintenance_type as last_maintenance_type,
+        m.date as last_maintenance_date,
+        -- Calculate days since last maintenance
+        EXTRACT(DAY FROM (NOW() - m.date)) as days_since_maintenance,
+        -- Calculate if service is due (example: 30 days)
+        CASE 
+          WHEN m.date IS NULL THEN false
+          WHEN EXTRACT(DAY FROM (NOW() - m.date)) > 30 THEN true
+          ELSE false
+        END as service_due
+      FROM equipment_assignments ea
+      INNER JOIN equipment e ON ea.equipment_id = e.id
+      LEFT JOIN LATERAL (
+        SELECT maintenance_type, date
+        FROM maintenance_logs
+        WHERE equipment_id = e.id
+        ORDER BY date DESC
+        LIMIT 1
+      ) m ON true
+      WHERE ea.assigned_to = $1 
+        AND ea.returned_at IS NULL
+        AND e.status != 'Retired'
+      ORDER BY ea.assigned_at DESC
+    `, [userId]);
+
+    console.log(`✅ Found ${rows.length} assigned equipment`);
+    res.json(rows);
+  } catch (err) {
+    console.error('❌ Get my assigned equipment error:', err);
+    res.status(500).json({ 
+      error: 'Failed to fetch assigned equipment',
+      details: err.message 
+    });
+  }
+});
+
+/**
+ * @route   GET /api/equipment/assignment-history
+ * @desc    Get assignment history for logged-in engineer
+ * @access  Engineer, Admin
+ */
+router.get('/assignment-history', authenticateJWT(), async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const { rows } = await pool.query(`
+      SELECT 
+        ea.*,
+        e.name as equipment_name,
+        e.description as equipment_description,
+        u.name as assigned_by_name
+      FROM equipment_assignments ea
+      INNER JOIN equipment e ON ea.equipment_id = e.id
+      LEFT JOIN users u ON ea.assigned_by = u.id
+      WHERE ea.assigned_to = $1
+      ORDER BY ea.assigned_at DESC
+      LIMIT $2
+    `, [userId, limit]);
+
+    res.json(rows);
+  } catch (err) {
+    console.error('❌ Get assignment history error:', err);
+    res.status(500).json({ error: 'Failed to fetch assignment history' });
+  }
+});
+
+// ============================================================================
+// NOW the parameterized routes can come (they won't catch specific routes above)
+// ============================================================================
 
 // @desc    Get all equipment
 router.get('/', authenticateJWT(), async (req, res) => {
@@ -96,16 +197,14 @@ router.get('/:id/maintenance', authenticateJWT(), async (req, res) => {
   }
 });
 
-// routes/equipment.js
+// @desc    Add maintenance log for equipment
 router.post('/:id/maintenance', authenticateJWT(), async (req, res) => {
   const { id } = req.params;
   const { maintenance_type, description, date } = req.body;
   
   try {
-    // Log the incoming data for debugging
     console.log('Adding maintenance log:', { id, maintenance_type, description, date });
     
-    // Insert the data using the correct column names
     const { rows } = await pool.query(
       `INSERT INTO maintenance_logs 
        (equipment_id, maintenance_type, description, date)
@@ -122,6 +221,98 @@ router.post('/:id/maintenance', authenticateJWT(), async (req, res) => {
   }
 });
 
+/**
+ * @route   POST /api/equipment/:id/report-issue
+ * @desc    Quick report equipment issue (creates maintenance request)
+ * @access  Engineer
+ */
+router.post('/:id/report-issue', 
+  authenticateJWT(), 
+  checkRole(['engineer', 'admin']), 
+  async (req, res) => {
+    const equipmentId = req.params.id;
+    const { issue_description, urgency = 'Medium' } = req.body;
+    const userId = req.user.id;
+
+    if (!issue_description || !issue_description.trim()) {
+      return res.status(400).json({ error: 'Issue description is required' });
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Get user's department
+      const userDept = await client.query(
+        'SELECT department_id FROM users WHERE id = $1',
+        [userId]
+      );
+
+      if (!userDept.rows.length) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'User department not found' });
+      }
+
+      const departmentId = userDept.rows[0].department_id;
+
+      // Create request
+      const requestRes = await client.query(
+        `INSERT INTO requests (
+          requested_by, 
+          subject, 
+          description, 
+          priority, 
+          department_id, 
+          request_type,
+          status,
+          created_at,
+          updated_at
+        )
+        VALUES ($1, $2, $3, $4, $5, 'maintenance', 'Pending', NOW(), NOW())
+        RETURNING id`,
+        [
+          userId,
+          `Equipment Issue: ${equipmentId}`,
+          issue_description,
+          urgency,
+          departmentId
+        ]
+      );
+
+      const requestId = requestRes.rows[0].id;
+
+      // Insert into maintenance_requests if that table exists
+      try {
+        await client.query(
+          `INSERT INTO maintenance_requests (request_id, equipment_id, issue_description, urgency)
+           VALUES ($1, $2, $3, $4)`,
+          [requestId, equipmentId, issue_description, urgency]
+        );
+      } catch (err) {
+        // Table might not exist, that's okay
+        console.log('ℹ️ maintenance_requests table not found, skipping...');
+      }
+
+      await client.query('COMMIT');
+      
+      console.log(`✅ Issue reported for equipment #${equipmentId} - Request #${requestId}`);
+      
+      res.status(201).json({ 
+        message: 'Issue reported successfully',
+        request_id: requestId 
+      });
+    } catch (err) {
+      await client.query('ROLLBACK');
+      console.error('❌ Report equipment issue error:', err);
+      res.status(500).json({ 
+        error: 'Failed to report equipment issue',
+        details: err.message 
+      });
+    } finally {
+      client.release();
+    }
+});
+
 // @desc    Create new equipment
 router.post('/', 
   authenticateJWT(), 
@@ -129,7 +320,6 @@ router.post('/',
   async (req, res) => {
     const { name, description, status = 'available', location } = req.body;
     
-    // Basic validation
     if (!name) {
       return res.status(400).json({ error: 'Equipment name is required' });
     }
@@ -146,16 +336,16 @@ router.post('/',
     } catch (err) {
       console.error('Create equipment error:', err);
       
-      if (err.code === '23505') { // Unique violation
+      if (err.code === '23505') {
         return res.status(400).json({ error: 'Equipment with this name already exists' });
       }
-      if (err.code === '23502') { // Not null violation
+      if (err.code === '23502') {
         return res.status(400).json({ error: 'Required field missing' });
       }
       
       res.status(500).json({ 
         error: 'Failed to create equipment',
-        detail: err.message // Include more error details
+        detail: err.message
       });
     }
   }
@@ -170,7 +360,6 @@ router.put('/:id',
     const { name, description, status, location, last_maintained } = req.body;
     
     try {
-      // First verify equipment exists
       const exists = await pool.query('SELECT id FROM equipment WHERE id = $1', [id]);
       if (exists.rows.length === 0) {
         return res.status(404).json({ error: 'Equipment not found' });
@@ -205,7 +394,6 @@ router.put('/:id',
   }
 );
 
-
 // @desc    Delete equipment
 router.delete('/:id',
   authenticateJWT(),
@@ -214,7 +402,6 @@ router.delete('/:id',
     const { id } = req.params;
 
     try {
-      // Verify equipment exists
       const exists = await pool.query('SELECT id FROM equipment WHERE id = $1', [id]);
       if (exists.rows.length === 0) {
         return res.status(404).json({ error: 'Equipment not found' });

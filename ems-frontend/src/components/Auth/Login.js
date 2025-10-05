@@ -1,59 +1,90 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/api';
-import './Login.css';
 import logo from '../../assets/wfsllogo.png';
+import './Login.css';
 
 const Login = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      return;
-    }
-    
+    setError('');
+    setLoading(true);
+
     try {
-      const { data } = await authService.login({ email, password });
+      const { data } = await authService.login({ email, password }); // ← Fixed: added { }
       
+      // Store auth data
       localStorage.setItem('token', data.token);
+      localStorage.setItem('userName', data.user.name);
       localStorage.setItem('userRole', data.user.role);
       localStorage.setItem('userId', data.user.id);
-      localStorage.setItem('userName', data.user.name);
-      navigate('/dashboard');
+      
+      console.log('✅ Login successful, role:', data.user.role);
+      
+      // Navigate to dashboard
+      navigate('/dashboard', { replace: true });
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Login failed';
-      setError(errorMsg.includes('credentials') ? 'Invalid email or password' : errorMsg);
+      setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
+      console.error('❌ Login error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-page">
       <div className="login-container">
-        <img src={logo} alt="Well Fluid Services Limited" className="company-logo" />
-        <h2>WFSL EMRS</h2>
-        {error && <div className="error-message">{error}</div>}
-        <form onSubmit={handleLogin}>
+        <img src={logo} alt="Well Fluid Services Limited" className="login-logo" />
+        
+        <h2>EMRS</h2>
+        <p>Sign in to access your dashboard</p>
+
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="email" className="form-label">Email Address</label>
           <input
+            id="email"
             type="email"
-            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            placeholder="example@wfsl.com"
             required
+            autoFocus
           />
+
+          <label htmlFor="password" className="form-label">Password</label>
           <input
+            id="password"
             type="password"
-            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
             required
           />
-          <button type="submit">Login</button>
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className={loading ? 'loading' : ''}
+          >
+            {loading ? '' : 'Sign In'}
+          </button>
         </form>
+
+        <div className="login-footer">
+          Need help? Contact your system administrator
+        </div>
       </div>
     </div>
   );

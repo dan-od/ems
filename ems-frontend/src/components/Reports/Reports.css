@@ -154,3 +154,492 @@
   color: #666;
   font-size: 0.85em;
 }
+
+/* Field Report Form */
+.field-report-form-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.form-header h1 {
+  margin: 0;
+  color: #1a202c;
+}
+
+.field-report-form {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+}
+
+.form-section h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  color: #2d3748;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #4a5568;
+  font-size: 0.875rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-size: 0.9375rem;
+}
+
+.btn-primary {
+  background: #ff6b35;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #e5522d;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #1a202c;
+}
+
+.btn-secondary:hover {
+  background: #cbd5e0;
+}
+
+/* Reports List */
+.reports-list-container {
+  padding: 2rem;
+}
+
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.reports-header h1 {
+  margin: 0;
+  color: #1a202c;
+}
+
+.reports-table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.reports-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.reports-table th {
+  background: #f7fafc;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #2d3748;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.reports-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.reports-table tbody tr:hover {
+  background: #f7fafc;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-submitted {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-reviewed {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn-view {
+  background: #ff6b35;
+  color: white;
+}
+
+.btn-view:hover {
+  background: #e5522d;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state p {
+  color: #718096;
+  margin-bottom: 1rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .field-report-form-container {
+    padding: 1rem;
+  }
+
+  .form-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .field-report-form {
+    padding: 1.5rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .reports-table-container {
+    overflow-x: scroll;
+  }
+
+  .reports-table {
+    min-width: 700px;
+  }
+}
+
+/* File Upload Styling */
+.form-description {
+  color: #718096;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.file-upload-area {
+  margin-bottom: 1.5rem;
+}
+
+.file-upload-area input[type="file"] {
+  display: none;
+}
+
+.file-upload-label {
+  display: block;
+  border: 2px dashed #cbd5e0;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #f7fafc;
+}
+
+.file-upload-label:hover {
+  border-color: #ff6b35;
+  background: #fff;
+}
+
+.file-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upload-icon {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.file-placeholder p {
+  margin: 0;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.file-placeholder small {
+  color: #718096;
+}
+
+.file-selected {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 6px;
+}
+
+.file-icon {
+  font-size: 2.5rem;
+}
+
+.file-selected strong {
+  display: block;
+  color: #1a202c;
+  margin-bottom: 0.25rem;
+}
+
+.file-selected p {
+  margin: 0;
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+
+.btn-download {
+  background: #10b981;
+  color: white;
+}
+
+.btn-download:hover {
+  background: #059669;
+}
+
+/* Report Detail View */
+.report-detail-container {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.report-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.btn-back {
+  padding: 0.5rem 1rem;
+  background: #e2e8f0;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-back:hover {
+  background: #cbd5e0;
+}
+
+.report-detail-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.report-status-section {
+  margin-bottom: 2rem;
+  text-align: right;
+}
+
+.detail-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-section:last-child {
+  border-bottom: none;
+}
+
+.detail-section h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: #2d3748;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.detail-item label {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 0.875rem;
+}
+
+.detail-item span,
+.detail-item p {
+  color: #1a202c;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f7fafc;
+  border-radius: 8px;
+}
+
+.file-icon {
+  font-size: 2.5rem;
+}
+
+.review-section {
+  background: #f7fafc;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.review-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-approve,
+.btn-success {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-approve {
+  background: #3182ce;
+  color: white;
+}
+
+.btn-approve:hover {
+  background: #2c5282;
+}
+
+.btn-success {
+  background: #10b981;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.review-history {
+  padding: 1rem;
+  background: #f7fafc;
+  border-radius: 6px;
+}
+
+.review-history p {
+  margin: 0.5rem 0;
+}

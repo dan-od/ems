@@ -6,7 +6,8 @@ const pool = require('./config/db');
 const authRoutes = require('./routes/auth');
 const equipmentRoutes = require('./routes/equipment');
 const assignmentRoutes = require('./routes/assignments');
-
+const dashboardRoutes = require('./routes/dashboard');
+const fieldReportsRoutes = require('./routes/fieldReports'); 
 // ✅ ONLY CHANGE: Load modular requests folder instead of monolithic file
 const requestRoutes = require('./routes/requests/index');  // ← Changed from './routes/requests'
 
@@ -74,6 +75,13 @@ console.log('  ✅ Departments');
 app.use('/api/maintenance-requests', maintenanceRequestRoutes);
 console.log('  ✅ Maintenance');
 
+app.use('/api/dashboard', dashboardRoutes);
+console.log('  ✅ Dashboard');
+
+app.use('/api/field-reports', fieldReportsRoutes);
+console.log('  ✅ Field Reports');
+
+
 console.log('✅ All routes registered\n');
 
 // Error handling
@@ -84,4 +92,8 @@ app.use((err, req, res, next) => {
 
 // Start server
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`   Local:   http://localhost:${PORT}`);
+  console.log(`   Network: http://192.168.2.226:${PORT}`);
+});

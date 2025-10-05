@@ -71,6 +71,9 @@ export const equipmentService = {
   update: (id, data) => api.put(`/equipment/${id}`, data),
   delete: (id) => api.delete(`/equipment/${id}`),
   getStats: () => api.get('/equipment/stats'),
+  getMyAssigned: () => api.get('/equipment/my-assigned'),
+  getAssignmentHistory: (limit = 20) => api.get('/equipment/assignment-history', { params: { limit } }),
+  reportIssue: (equipmentId, data) => api.post(`/equipment/${equipmentId}/report-issue`, data),
 
   // Only equipment under maintenance (page/limit/q also supported)
   getUnderMaintenance: (params = {}) =>
@@ -162,6 +165,23 @@ export const departmentService = {
   create: (data) => api.post('/departments', data),
   update: (id, data) => api.put(`/departments/${id}`, data),
   delete: (id) => api.delete(`/departments/${id}`),
+};
+
+// ----- Dashboard -----
+export const dashboardService = {
+  getEngineerStats: () => api.get('/dashboard/engineer-stats'),
+  getManagerStats: (deptId) => api.get('/dashboard/manager-stats', { params: { deptId } }),
+  getAdminStats: () => api.get('/dashboard/admin-stats'),
+};
+
+// Add field reports service
+export const fieldReportsService = {
+  submit: (data) => api.post('/field-reports', data),
+  getMyReports: (params) => api.get('/field-reports/my-reports', { params }),
+  getDepartmentReports: (deptId) => api.get('/field-reports/department', { params: { deptId } }),
+  getById: (id) => api.get(`/field-reports/${id}`),
+  review: (id, data) => api.patch(`/field-reports/${id}/review`, data),
+  delete: (id) => api.delete(`/field-reports/${id}`)
 };
 
 export default api;

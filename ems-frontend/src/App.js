@@ -12,7 +12,7 @@ import DashboardHome from './components/Dashboard/DashboardHome';
 import RequestList from './components/Requests/RequestList';
 import RequestForm from './components/Requests/RequestForm';
 import RequestDetail from './components/Requests/RequestDetail';
-import Reports from './components/Reports/Reports';
+import Reports from './components/Reports/Reports';  // ← Keep for maintenance/system logs
 import AssignRoles from './components/User/AssignRoles';
 import AddUser from './components/User/AddUser';
 import RequestHub from "./components/RequestHub/RequestHub";
@@ -22,6 +22,9 @@ import EquipmentRequestForm from "./components/RequestHub/EquipmentRequestForm";
 import TransportForm from "./components/RequestHub/TransportForm";
 import MaintenanceForm from "./components/RequestHub/MaintenanceForm";
 import ManagerRequests from './components/Requests/ManagerRequests';
+import FieldReportForm from './components/Reports/FieldReportForm';
+import ReportsList from './components/Reports/ReportsList';
+import ReportDetail from './components/Reports/ReportDetail';
 
 // NEW pages
 import IssueCreate from './components/Issues/IssueCreate';
@@ -45,10 +48,10 @@ function App() {
           <Route path="under-maintenance" element={<MaintenanceLogs />} />
 
           {/* Requests */}
-          <Route path="requests" element={<RequestHub />} />  {/* Request Hub */}
-          <Route path="my-requests" element={<RequestList />} /> {/* User: My Requests */}
-          <Route path="manager-requests" element={<ManagerRequests />} /> {/* Manager: Dept Requests */}
-          <Route path="requests/list" element={<RequestList />} /> {/* (optional: keep or remove) */}
+          <Route path="requests" element={<RequestHub />} />
+          <Route path="my-requests" element={<RequestList />} />
+          <Route path="manager-requests" element={<ManagerRequests />} />
+          <Route path="requests/list" element={<RequestList />} />
           <Route path="requests/:id" element={<RequestDetail />} />
           <Route path="new-request" element={<RequestForm />} />
 
@@ -63,8 +66,13 @@ function App() {
           <Route path="issues/new" element={<IssueCreate />} />
           <Route path="returns/new" element={<ReturnCreate />} />
 
-          {/* Reports */}
-          <Route path="reports" element={<Reports />} />
+          {/* System Reports/Logs (OLD - maintenance logs, etc.) */}
+          <Route path="logs" element={<Reports />} />
+          
+          {/* Field Reports (NEW - job completion reports) */}
+          <Route path="field-reports" element={<ReportsList />} />
+          <Route path="submit-report" element={<FieldReportForm />} />
+          <Route path="report/:id" element={<ReportDetail />} />
 
           {/* Users (Admin only) */}
           <Route path="users" element={<AssignRoles />} />
