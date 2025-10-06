@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
-import { useAutoRefresh } from '../../hooks/useAutoRefresh';
+import api from '../../../services/api';
+import { useAutoRefresh } from '../../../hooks/useAutoRefresh';
 
 const StaffDashboard = () => {
   const navigate = useNavigate();

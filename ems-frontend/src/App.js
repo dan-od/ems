@@ -25,6 +25,7 @@ import ManagerRequests from './components/Requests/ManagerRequests';
 import FieldReportForm from './components/Reports/FieldReportForm';
 import ReportsList from './components/Reports/ReportsList';
 import ReportDetail from './components/Reports/ReportDetail';
+import DashboardRouter from './components/Dashboard/RoleSpecific/DashboardRouter';
 
 // NEW pages
 import IssueCreate from './components/Issues/IssueCreate';
@@ -40,7 +41,7 @@ function App() {
       <Route element={<ProtectedRoute allowedRoles={['admin', 'manager', 'engineer', 'staff']} />}>
         <Route path="/dashboard" element={<Dashboard />}>
           {/* Default landing */}
-          <Route index element={<DashboardHome />} />
+          <Route index element={<DashboardRouter />} />
 
           {/* Equipment */}
           <Route path="all-equipment" element={<EquipmentList />} />

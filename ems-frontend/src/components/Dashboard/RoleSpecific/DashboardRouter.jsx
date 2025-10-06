@@ -1,9 +1,9 @@
 // ems-frontend/src/components/Dashboard/DashboardRouter.jsx
 import React from 'react';
-import EngineerDashboard from './RoleSpecific/EngineerDashboard';
-import ManagerDashboard from './RoleSpecific/ManagerDashboard';
-import AdminDashboard from './RoleSpecific/AdminDashboard';
-import StaffDashboard from './RoleSpecific/StaffDashboard';
+import EngineerDashboard from './EngineerDashboard';
+import ManagerDashboard from './ManagerDashboard';
+import AdminDashboard from './AdminDashboard';
+import StaffDashboard from './StaffDashboard';
 
 /**
  * DashboardRouter - Routes to role-specific dashboards

@@ -1,5 +1,5 @@
 import React from 'react';
-import EngineerDashboard from './Dashboards/EngineerDashboard';
+import EngineerDashboard from './RoleSpecific/EngineerDashboard';
 import { Navigate } from 'react-router-dom';
 
 const DashboardHome = () => {
