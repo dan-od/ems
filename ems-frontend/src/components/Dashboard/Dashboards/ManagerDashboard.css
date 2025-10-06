@@ -1,0 +1,149 @@
+/* ems-frontend/src/components/Dashboard/RoleSpecific/ManagerDashboard.css */
+
+/* Manager Dashboard Specific Styles */
+.manager-dashboard {
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+/* Loading and Error States */
+.manager-dashboard .loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+}
+
+.manager-dashboard .error-container {
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+/* Stats Cards - Additional Styling */
+.manager-dashboard .stats-card-urgent {
+  animation: pulse-orange 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-orange {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Widget Container Styles */
+.manager-dashboard .widget {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.manager-dashboard .widget-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.manager-dashboard .widget-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.manager-dashboard .widget-content {
+  padding: 1.5rem;
+}
+
+/* Responsive Grid Adjustments */
+@media (max-width: 1024px) {
+  .manager-dashboard .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Approval Queue Specific */
+.approval-queue-item {
+  transition: background-color 0.2s;
+}
+
+.approval-queue-item:hover {
+  background-color: #f9fafb;
+}
+
+/* Team Overview Specific */
+.team-member-item {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.team-member-item:hover {
+  background-color: #f9fafb;
+}
+
+/* Performance Metrics */
+.metric-progress-bar {
+  height: 0.5rem;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.metric-progress-fill {
+  height: 100%;
+  transition: width 0.5s ease-in-out;
+}
+
+/* Cross-Department Activity */
+.transfer-tabs button {
+  transition: all 0.2s;
+}
+
+.transfer-tabs button:hover {
+  transform: translateY(-1px);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .manager-dashboard {
+    padding: 1rem;
+  }
+
+  .manager-dashboard .stats-card {
+    padding: 1rem;
+  }
+
+  .manager-dashboard .widget-header {
+    padding: 1rem;
+  }
+
+  .manager-dashboard .widget-content {
+    padding: 1rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .manager-dashboard button,
+  .manager-dashboard .btn {
+    display: none;
+  }
+
+  .manager-dashboard .widget {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+/* Accessibility */
+.manager-dashboard button:focus,
+.manager-dashboard a:focus {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
+
+/* Dark Mode Support (Future Enhancement) */
+@media (prefers-color-scheme: dark) {
+  /* Dark mode styles can be added here in the future */
+}
