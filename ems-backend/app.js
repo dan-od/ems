@@ -8,20 +8,22 @@ const equipmentRoutes = require('./routes/equipment');
 const assignmentRoutes = require('./routes/assignments');
 const dashboardRoutes = require('./routes/dashboard');
 const fieldReportsRoutes = require('./routes/fieldReports'); 
-// ✅ ONLY CHANGE: Load modular requests folder instead of monolithic file
-const requestRoutes = require('./routes/requests/index');  // ← Changed from './routes/requests'
-
+const requestRoutes = require('./routes/requests/index');
 const reportsRoutes = require('./routes/reports');
 const userRoutes = require('./routes/user');
 const departmentRoutes = require('./routes/departments');
 const maintenanceRequestRoutes = require('./routes/maintenanceRequests');
+
+// ✅ NEW: Import stats route
+const statsRoutes = require('./routes/stats/managerStats');
+
 const app = express();
 
 // Middleware
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'http://192.168.2.226:3000'  // ← Add your iPad IP
+    'http://192.168.2.226:3000'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -81,6 +83,9 @@ console.log('  ✅ Dashboard');
 app.use('/api/field-reports', fieldReportsRoutes);
 console.log('  ✅ Field Reports');
 
+// ✅ NEW: Register stats route
+app.use('/api/stats', statsRoutes);
+console.log('  ✅ Stats');
 
 console.log('✅ All routes registered\n');
 
