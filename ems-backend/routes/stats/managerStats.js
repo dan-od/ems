@@ -74,6 +74,7 @@ router.get('/manager-dashboard',
           LEFT JOIN equipment e ON r.equipment_id = e.id
           WHERE r.department_id = $1 
             AND r.status = 'Pending'
+            AND r.id IS NOT NULL
           ORDER BY 
             CASE r.priority
               WHEN 'Urgent' THEN 1
@@ -97,7 +98,7 @@ router.get('/manager-dashboard',
           FROM users u
           LEFT JOIN requests r ON r.requested_by = u.id 
             AND r.status IN ('Pending', 'Approved', 'In Progress')
-          LEFT JOIN equipment_assignments ea ON ea.engineer_id = u.id 
+          LEFT JOIN equipment_assignments ea ON ea.assigned_to = u.id 
             AND ea.returned_at IS NULL
           WHERE u.department_id = $1 
             AND u.role IN ('engineer', 'staff')
@@ -162,11 +163,11 @@ router.get('/manager-dashboard',
             AND created_at >= CURRENT_DATE - INTERVAL '7 days'
         `, [deptId]),
 
-        // 6. Equipment Assigned to Department
+        // 6. Equipment Assigned to Department - CORRECTED
         pool.query(`
           SELECT COUNT(DISTINCT ea.id) as dept_equipment_assigned
           FROM equipment_assignments ea
-          JOIN users u ON ea.engineer_id = u.id
+          JOIN users u ON ea.assigned_to = u.id
           WHERE u.department_id = $1 
             AND ea.returned_at IS NULL
         `, [deptId])

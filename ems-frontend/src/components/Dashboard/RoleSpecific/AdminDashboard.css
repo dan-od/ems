@@ -1,0 +1,62 @@
+/* ems-frontend/src/components/Dashboard/RoleSpecific/AdminDashboard.css */
+
+.admin-dashboard {
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+.admin-dashboard table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.admin-dashboard table th {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.admin-dashboard table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.admin-dashboard .shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.admin-dashboard .shadow:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease;
+}
+
+/* Scrollbar styling for recent activity */
+.admin-dashboard .overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-dashboard .overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.admin-dashboard .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.admin-dashboard .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding: 1rem;
+  }
+  
+  .admin-dashboard h1 {
+    font-size: 1.5rem;
+  }
+  
+  .admin-dashboard .overflow-x-auto table {
+    font-size: 0.875rem;
+  }
+}

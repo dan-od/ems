@@ -13,9 +13,8 @@ const reportsRoutes = require('./routes/reports');
 const userRoutes = require('./routes/user');
 const departmentRoutes = require('./routes/departments');
 const maintenanceRequestRoutes = require('./routes/maintenanceRequests');
-
-// ✅ NEW: Import stats route
 const statsRoutes = require('./routes/stats/managerStats');
+const adminStatsRoutes = require('./routes/stats/adminStats');
 
 const app = express();
 
@@ -83,9 +82,11 @@ console.log('  ✅ Dashboard');
 app.use('/api/field-reports', fieldReportsRoutes);
 console.log('  ✅ Field Reports');
 
-// ✅ NEW: Register stats route
 app.use('/api/stats', statsRoutes);
-console.log('  ✅ Stats');
+console.log('  ✅ Stats (Manager)');
+
+app.use('/api/stats', adminStatsRoutes);
+console.log('  ✅ Stats (Admin)');
 
 console.log('✅ All routes registered\n');
 
