@@ -1,80 +1,19 @@
+// ems-backend/routes/reports.js
+// RENAMED PURPOSE: Department activity reports (from request_approvals table)
+// Does NOT handle maintenance logs - that's in maintenance.js
+
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const { authenticateJWT, checkRole } = require('../middleware/auth');  // ✅ Add checkRole here
+const { authenticateJWT, checkRole } = require('../middleware/auth');
 
-// Get all reports
-router.get('/', authenticateJWT(), async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT 
-        r.id,
-        r.date,
-        r.type,
-        r.description,
-        r.status,
-        COALESCE(u.name, 'Unknown') as user
-      FROM reports r
-      LEFT JOIN users u ON r.user_id = u.id
-      ORDER BY r.date DESC
-    `);
-    
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching reports:', error);
-    res.status(500).json({ message: 'Error fetching reports', error: error.message });
-  }
-});
-
-// Get reports by date range
-router.get('/filter', authenticateJWT(), async (req, res) => {
-  const { startDate, endDate, type } = req.query;
-  
-  try {
-    let query = `
-      SELECT 
-        r.id,
-        r.date,
-        r.type,
-        r.description,
-        r.status,
-        COALESCE(u.name, 'Unknown') as user
-      FROM reports r
-      LEFT JOIN users u ON r.user_id = u.id
-      WHERE 1=1
-    `;
-    
-    const params = [];
-    let paramCount = 1;
-
-    if (startDate) {
-      query += ` AND r.date >= $${paramCount}`;
-      params.push(startDate);
-      paramCount++;
-    }
-
-    if (endDate) {
-      query += ` AND r.date <= $${paramCount}`;
-      params.push(endDate);
-      paramCount++;
-    }
-
-    if (type) {
-      query += ` AND r.type = $${paramCount}`;
-      params.push(type);
-    }
-
-    query += ` ORDER BY r.date DESC`;
-
-    const result = await pool.query(query, params);
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error filtering reports:', error);
-    res.status(500).json({ message: 'Error filtering reports', error: error.message });
-  }
-});
-
-// Get department activity report for managers
+/**
+ * @route   GET /api/reports/department-activity
+ * @desc    Get department activity report for managers (approvals, rejections, transfers)
+ * @access  Manager, Admin, Staff
+ * 
+ * This uses the request_approvals audit table, NOT maintenance_logs
+ */
 router.get('/department-activity', authenticateJWT(), checkRole(['manager', 'admin', 'staff']), async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
@@ -88,6 +27,8 @@ router.get('/department-activity', authenticateJWT(), checkRole(['manager', 'adm
     if (!departmentId) {
       return res.status(400).json({ error: 'Department not specified' });
     }
+
+    console.log(`\n📊 [REPORTS] Fetching department activity for dept #${departmentId}`);
 
     // Build date filter
     let dateFilter = '';
@@ -138,6 +79,8 @@ router.get('/department-activity', authenticateJWT(), checkRole(['manager', 'adm
       LIMIT 100
     `, params);
 
+    console.log(`   ✅ Returning ${rows.length} department activities`);
+
     res.json(rows);
   } catch (err) {
     console.error('❌ Fetch department activity error:', err);
@@ -148,5 +91,44 @@ router.get('/department-activity', authenticateJWT(), checkRole(['manager', 'adm
   }
 });
 
+/**
+ * @route   GET /api/reports/summary
+ * @desc    Get summary statistics for reports dashboard
+ * @access  Manager, Admin
+ */
+router.get('/summary', authenticateJWT(), checkRole(['manager', 'admin']), async (req, res) => {
+  try {
+    const { department_id, role } = req.user;
 
-module.exports = router; 
+    let whereClause = '1=1';
+    const params = [];
+
+    if (role !== 'admin' && department_id) {
+      whereClause = 'r.department_id = $1';
+      params.push(department_id);
+    }
+
+    const { rows } = await pool.query(`
+      SELECT 
+        COUNT(*) as total_requests,
+        COUNT(CASE WHEN r.status = 'Pending' THEN 1 END) as pending_count,
+        COUNT(CASE WHEN r.status = 'Approved' THEN 1 END) as approved_count,
+        COUNT(CASE WHEN r.status = 'Rejected' THEN 1 END) as rejected_count,
+        COUNT(CASE WHEN r.status = 'Transferred' THEN 1 END) as transferred_count,
+        COUNT(CASE WHEN r.created_at >= DATE_TRUNC('month', CURRENT_DATE) THEN 1 END) as this_month_count,
+        COUNT(CASE WHEN r.created_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 END) as this_week_count
+      FROM requests r
+      WHERE ${whereClause}
+    `, params);
+
+    res.json(rows[0] || {});
+  } catch (err) {
+    console.error('❌ Fetch summary error:', err);
+    res.status(500).json({ 
+      error: 'Failed to fetch summary',
+      details: err.message 
+    });
+  }
+});
+
+module.exports = router;

@@ -83,66 +83,127 @@ const Dashboard = () => {
 
         <nav className="menu">
           <ul>
+            {/* ========================================
+                MAIN DASHBOARD
+                ======================================== */}
             <li>
-              <Link to="/dashboard" className={isActive('/dashboard') && location.pathname === '/dashboard' ? 'active' : ''}>
-                Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link to="/dashboard/all-equipment" className={isActive('/dashboard/all-equipment') ? 'active' : ''}>
-                All Equipment
-              </Link>
-            </li>
-            <li>
-              <Link to="/dashboard/under-maintenance" className={isActive('/dashboard/under-maintenance') ? 'active' : ''}>
-                Under Maintenance
-              </Link>
-            </li>
-            <li>
-              <Link to="/dashboard/requests" className={isActive('/dashboard/requests') ? 'active' : ''}>
-                Request Hub
-              </Link>
-            </li>
-            <li>
-              <Link to="/dashboard/my-requests" className={isActive('/dashboard/my-requests') ? 'active' : ''}>
-                My Requests
+              <Link 
+                to="/dashboard" 
+                className={isActive('/dashboard') && location.pathname === '/dashboard' ? 'active' : ''}
+              >
+                📊 Dashboard
               </Link>
             </li>
 
+            {/* ========================================
+                EQUIPMENT SECTION
+                ======================================== */}
+            <li>
+              <Link 
+                to="/dashboard/all-equipment" 
+                className={isActive('/dashboard/all-equipment') ? 'active' : ''}
+              >
+                🔧 All Equipment
+              </Link>
+            </li>
+
+            <li>
+              <Link 
+                to="/dashboard/maintenance-logs" 
+                className={isActive('/dashboard/maintenance-logs') ? 'active' : ''}
+              >
+                🛠️ Maintenance Logs
+              </Link>
+            </li>
+
+            {/* ========================================
+                REQUESTS SECTION
+                ======================================== */}
+            <li>
+              <Link 
+                to="/dashboard/requests" 
+                className={isActive('/dashboard/requests') ? 'active' : ''}
+              >
+                📦 Request Hub
+              </Link>
+            </li>
+
+            <li>
+              <Link 
+                to="/dashboard/my-requests" 
+                className={isActive('/dashboard/my-requests') ? 'active' : ''}
+              >
+                📝 My Requests
+              </Link>
+            </li>
+
+            {/* Manager/Admin Only - Department Requests */}
             {(userRole === 'manager' || userRole === 'admin') && (
               <li>
-                <Link to="/dashboard/manager-requests" className={isActive('/dashboard/manager-requests') ? 'active' : ''}>
-                  Dept Requests
+                <Link 
+                  to="/dashboard/manager-requests" 
+                  className={isActive('/dashboard/manager-requests') ? 'active' : ''}
+                >
+                  ✅ Dept Requests
                 </Link>
               </li>
             )}
 
-            {/* System Reports/Logs (OLD - for maintenance logs, etc.) */}
+            {/* ========================================
+                REPORTING & MONITORING SECTION
+                ======================================== */}
+            
+            {/* ALL ROLES - Activity Feed (User Actions Audit Trail) */}
             <li>
-              <Link to="/dashboard/logs" className={isActive('/dashboard/logs') ? 'active' : ''}>
-                Reports / Logs
+              <Link 
+                to="/dashboard/activity-feed" 
+                className={isActive('/dashboard/activity-feed') ? 'active' : ''}
+              >
+                📋 Activity Feed
               </Link>
             </li>
 
-            {/* Field Reports (NEW - for job completion reports) */}
-            {(userRole === 'engineer' || userRole === 'manager' || userRole === 'admin') && (
+            {/* Manager/Admin Only - Department Reports */}
+            {(userRole === 'manager' || userRole === 'admin') && (
               <li>
-                <Link to="/dashboard/field-reports" className={isActive('/dashboard/field-reports') ? 'active' : ''}>
-                  Field Reports
+                <Link 
+                  to="/dashboard/reports" 
+                  className={isActive('/dashboard/reports') ? 'active' : ''}
+                >
+                  📊 Department Reports
                 </Link>
               </li>
             )}
 
+            {/* ALL ROLES - Field Reports (Job Site Reports) */}
+            <li>
+              <Link 
+                to="/dashboard/field-reports" 
+                className={isActive('/dashboard/field-reports') ? 'active' : ''}
+              >
+                🗂️ Field Reports
+              </Link>
+            </li>
+
+            {/* ========================================
+                ADMIN SECTION
+                ======================================== */}
             {userRole === 'admin' && (
               <>
                 <li>
-                  <Link to="/dashboard/users" className={isActive('/dashboard/users') ? 'active' : ''}>
-                    Users
+                  <Link 
+                    to="/dashboard/users" 
+                    className={isActive('/dashboard/users') ? 'active' : ''}
+                  >
+                    👥 Users
                   </Link>
                 </li>
                 <li>
-                  <Link to="/dashboard/add-user" className={isActive('/dashboard/add-user') ? 'active' : ''}>
-                    Add New User
+                  <Link 
+                    to="/dashboard/add-user" 
+                    className={isActive('/dashboard/add-user') ? 'active' : ''}
+                  >
+                    ➕ Add New User
                   </Link>
                 </li>
               </>

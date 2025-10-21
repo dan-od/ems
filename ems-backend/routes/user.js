@@ -7,6 +7,7 @@ const { authenticateJWT, checkRole } = require('../middleware/auth');
 const pool       = require('../config/db');
 const router     = express.Router();
 const secret     = process.env.JWT_SECRET || 'ems_secret';
+const { logActivity, ACTION_TYPES, ENTITY_TYPES, extractUserInfo } = require('../utils/activityLogger');
 
 
 // Admin creates a new user
@@ -14,6 +15,7 @@ router.post('/',
   authenticateJWT(),
   checkRole(['admin']),
   async (req, res) => {
+    const adminInfo = extractUserInfo(req);
     const { name, email, role, password, department_id } = req.body;
 
     console.log('🔹 Creating new user:', { name, email, role, department_id });
@@ -42,6 +44,23 @@ router.post('/',
          RETURNING id, name, email, role, department_id`,
         [name, email, hashedPassword, role, department_id]
       );
+
+      const newUser = rows[0];
+      
+      // ✅ LOG USER CREATION
+      await logActivity({
+        ...adminInfo,
+        actionType: ACTION_TYPES.USER_CREATED,
+        entityType: ENTITY_TYPES.USER,
+        entityId: newUser.id,
+        entityName: newUser.name,
+        description: `Created user account: ${newUser.name} (${newUser.email}) as ${newUser.role}`,
+        metadata: {
+          email: newUser.email,
+          role: newUser.role,
+          department_id: newUser.department_id
+        }
+      });
 
       console.log('✅ User created successfully:', rows[0]);
       return res.status(201).json({ user: rows[0] });
@@ -167,37 +186,51 @@ router.post('/impersonate',
 );
 
 // Update user (admin only)
-router.put('/:id',
-  authenticateJWT(),
-  checkRole(['admin']),
-  async (req, res) => {
-    const { name, email, role, department_id } = req.body;
-    try {
-      const { rows } = await pool.query(
-        `UPDATE users
-           SET name = $1,
-               email = $2,
-               role = $3,
-               department_id = $4,
-               updated_at = CURRENT_TIMESTAMP
-         WHERE id = $5
-         RETURNING id, name, email, role, department_id`,
-        [name, email, role, department_id, req.params.id]
-      );
-
-      if (!rows.length) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-      res.json({ user: rows[0] });
-    } catch (err) {
-      console.error('❌ Update user error:', err);
-      if (err.code === '23505') {
-        return res.status(400).json({ error: 'Email already exists' });
-      }
-      res.status(500).json({ error: 'Failed to update user' });
+router.put('/:id', authenticateJWT(), checkRole(['admin']), async (req, res) => {
+  const userId = req.params.id;
+  const adminInfo = extractUserInfo(req);
+  const { name, email, role, department_id } = req.body;
+  
+  try {
+    // Get old values
+    const oldUser = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+    if (!oldUser.rows.length) {
+      return res.status(404).json({ error: 'User not found' });
     }
+    
+    const { rows } = await pool.query(
+      `UPDATE users
+       SET name = $1, email = $2, role = $3, department_id = $4, updated_at = NOW()
+       WHERE id = $5
+       RETURNING id, name, email, role, department_id`,
+      [name, email, role, department_id, userId]
+    );
+    
+    const updatedUser = rows[0];
+    
+    // Build changes
+    const changes = {};
+    if (name !== oldUser.rows[0].name) changes.name = { old: oldUser.rows[0].name, new: name };
+    if (email !== oldUser.rows[0].email) changes.email = { old: oldUser.rows[0].email, new: email };
+    if (role !== oldUser.rows[0].role) changes.role = { old: oldUser.rows[0].role, new: role };
+    
+    // ✅ LOG USER MODIFICATION
+    await logActivity({
+      ...adminInfo,
+      actionType: ACTION_TYPES.USER_MODIFIED,
+      entityType: ENTITY_TYPES.USER,
+      entityId: updatedUser.id,
+      entityName: updatedUser.name,
+      description: `Modified user account: ${updatedUser.name}`,
+      metadata: { changes }
+    });
+    
+    res.json({ user: updatedUser });
+  } catch (err) {
+    console.error('❌ Update user error:', err);
+    res.status(500).json({ error: 'Failed to update user' });
   }
-);
+});
 
 // Delete user (admin only) - reassign to Deleted User
 router.delete('/:id',
@@ -205,6 +238,9 @@ router.delete('/:id',
   checkRole(['admin']),
   async (req, res) => {
     const client = await pool.connect();
+    const userId = req.params.id;
+    const adminInfo = extractUserInfo(req);
+    
     try {
       await client.query('BEGIN');
 

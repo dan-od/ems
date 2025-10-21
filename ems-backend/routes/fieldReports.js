@@ -6,6 +6,7 @@ const pool = require('../config/db');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { logActivity, ACTION_TYPES, ENTITY_TYPES, extractUserInfo } = require('../utils/activityLogger');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -409,6 +410,23 @@ router.post('/',
         attachmentFilename,
         attachmentType
       ]);
+
+      const newReport = rows[0];
+    
+      // ✅ LOG REPORT SUBMISSION
+      await logActivity({
+        ...userInfo,
+        actionType: ACTION_TYPES.REPORT_SUBMITTED,
+        entityType: ENTITY_TYPES.FIELD_REPORT,
+        entityId: newReport.id,
+        entityName: newReport.job_title,
+        description: `Submitted field report: ${newReport.job_title}`,
+        metadata: {
+          location: newReport.job_location,
+          client: newReport.client_name,
+          job_type: newReport.job_type
+        }
+      });
 
       console.log(`✅ Field report created: #${rows[0].id} by user #${userId}`);
 

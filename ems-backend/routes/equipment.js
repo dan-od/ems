@@ -2,6 +2,7 @@ const express = require('express');
 const { authenticateJWT, checkRole } = require('../middleware/auth');
 const pool = require('../config/db');
 const router = express.Router();
+const { logActivity, ACTION_TYPES, ENTITY_TYPES, extractUserInfo } = require('../utils/activityLogger');
 
 // Status validation middleware
 const validateEquipmentStatus = (req, res, next) => {
@@ -318,6 +319,7 @@ router.post('/',
   authenticateJWT(), 
   checkRole(['admin', 'manager']), 
   async (req, res) => {
+    const userInfo = extractUserInfo(req);
     const { name, description, status = 'available', location } = req.body;
     
     if (!name) {
@@ -332,6 +334,22 @@ router.post('/',
          RETURNING *`,
         [name, description, status, location, req.user.id]
       );
+      
+      const newEquipment = rows[0];
+    
+      // ✅ LOG EQUIPMENT CREATION
+      await logActivity({
+        ...userInfo,
+        actionType: ACTION_TYPES.EQUIPMENT_CREATED,
+        entityType: ENTITY_TYPES.EQUIPMENT,
+        entityId: newEquipment.id,
+        entityName: newEquipment.name,
+        description: `Created equipment: ${newEquipment.name}`,
+        metadata: {
+          status: newEquipment.status,
+          location: newEquipment.location
+        }
+      });
       res.status(201).json(rows[0]);
     } catch (err) {
       console.error('Create equipment error:', err);
@@ -357,6 +375,7 @@ router.put('/:id',
   checkRole(['admin', 'manager']), 
   async (req, res) => {
     const { id } = req.params;
+    const userInfo = extractUserInfo(req);
     const { name, description, status, location, last_maintained } = req.body;
     
     try {
@@ -377,6 +396,25 @@ router.put('/:id',
          RETURNING *`,
         [name, description, status, location, last_maintained, id]
       );
+
+      const updatedEquipment = rows[0];
+    
+      // Build changes object
+      const changes = {};
+      if (name && name !== oldEquip.rows[0].name) changes.name = { old: oldEquip.rows[0].name, new: name };
+      if (status && status !== oldEquip.rows[0].status) changes.status = { old: oldEquip.rows[0].status, new: status };
+      if (location && location !== oldEquip.rows[0].location) changes.location = { old: oldEquip.rows[0].location, new: location };
+      
+      // ✅ LOG EQUIPMENT MODIFICATION
+      await logActivity({
+        ...userInfo,
+        actionType: ACTION_TYPES.EQUIPMENT_MODIFIED,
+        entityType: ENTITY_TYPES.EQUIPMENT,
+        entityId: updatedEquipment.id,
+        entityName: updatedEquipment.name,
+        description: `Modified equipment: ${updatedEquipment.name}`,
+        metadata: { changes }
+      });
       
       res.json(rows[0]);
     } catch (err) {
