@@ -1,4 +1,6 @@
-// src/App.js - CORRECTED VERSION (matches actual file structure)
+// ems-frontend/src/App.js
+// FIXED ROUTING STRUCTURE - Proper nested routes for Request Hub
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -14,34 +16,35 @@ import Dashboard from './components/Dashboard/dashboard';
 import DashboardHome from './components/Dashboard/DashboardHome';
 
 // ============================================
-// EQUIPMENT (Using actual files that exist)
+// EQUIPMENT
 // ============================================
 import EquipmentList from './components/Equipment/EquipmentList';
 import MaintenanceLog from './components/Equipment/MaintenanceLog';
 
 // ============================================
-// REQUESTS (Using actual files that exist)
+// REQUESTS & REQUEST HUB
 // ============================================
 import RequestHub from './components/RequestHub/RequestHub';
-import RequestList from './components/Requests/RequestList';
-import RecentRequests from './components/Requests/RecentRequests';
+import PPEForm from './components/RequestHub/PPEForm';
+import MaterialForm from './components/RequestHub/MaterialForm';
+import EquipmentRequestForm from './components/RequestHub/EquipmentRequestForm';
+import TransportForm from './components/RequestHub/TransportForm';
+import MaintenanceForm from './components/RequestHub/MaintenanceForm';
+import MyRequests from './components/Requests/RecentRequests'; // Or your My Requests component
 import ManagerRequests from './components/Requests/ManagerRequests';
 import RequestDetail from './components/Requests/RequestDetail';
 
 // ============================================
 // REPORTS & ACTIVITY
 // ============================================
-import { 
-  ReportsList as FieldReportsList,
-  FieldReportForm,
-  ReportDetail,
-  EquipmentMaintenanceLogs,
-  ActivityFeed,
-  DepartmentReports
-} from './components/Reports';
+import ActivityFeed from './components/Reports/ActivityFeed';
+import DepartmentReports from './components/Reports/DepartmentReports';
+import FieldReportsList from './components/Reports/ReportsList';
+import FieldReportForm from './components/Reports/FieldReportForm';
+import ReportDetail from './components/Reports/ReportDetail';
 
 // ============================================
-// USERS (ADMIN) - Using actual files
+// USERS (ADMIN)
 // ============================================
 import UserManagement from './components/User/UserManagement';
 import AddUser from './components/User/AddUser';
@@ -97,13 +100,32 @@ function App() {
           <Route path="maintenance-logs" element={<MaintenanceLog />} />
 
           {/* ==========================================
-              REQUEST ROUTES
+              REQUEST HUB AND FORMS - FIXED STRUCTURE
               ========================================== */}
-          <Route path="requests" element={<RequestHub />} />
-          <Route path="all-requests" element={<RequestList />} />
-          <Route path="recent-requests" element={<RecentRequests />} />
-          <Route path="request/:id" element={<RequestDetail />} />
+          <Route path="requests">
+            {/* Request Hub - Main Page */}
+            <Route index element={<RequestHub />} />
+            
+            {/* Individual Request Forms */}
+            <Route path="ppe" element={<PPEForm />} />
+            <Route path="material" element={<MaterialForm />} />
+            <Route path="equipment" element={<EquipmentRequestForm />} />
+            <Route path="transport" element={<TransportForm />} />
+            <Route path="maintenance" element={<MaintenanceForm />} />
+            
+            {/* View specific request */}
+            <Route path="view/:id" element={<RequestDetail />} />
+          </Route>
           
+          {/* Alternative route for request details */}
+          <Route path="request/:id" element={<RequestDetail />} />
+
+          {/* My Requests Page */}
+          <Route path="my-requests" element={<MyRequests />} />
+          
+          {/* Recent Requests (if different from My Requests) */}
+          <Route path="recent-requests" element={<MyRequests />} />
+
           {/* Manager/Admin Only - Department Requests */}
           <Route
             path="manager-requests"
@@ -118,11 +140,8 @@ function App() {
               REPORTING & MONITORING ROUTES
               ========================================== */}
           
-          {/* Activity Feed - All user actions */}
+          {/* Activity Feed */}
           <Route path="activity-feed" element={<ActivityFeed />} />
-          
-          {/* Equipment Maintenance Logs - Historical logs */}
-          <Route path="equipment-maintenance-logs" element={<EquipmentMaintenanceLogs />} />
           
           {/* Department Reports - Manager/Admin Only */}
           <Route
@@ -134,10 +153,12 @@ function App() {
             }
           />
 
-          {/* Field Reports - Job site reports */}
-          <Route path="field-reports" element={<FieldReportsList />} />
-          <Route path="field-reports/new" element={<FieldReportForm />} />
-          <Route path="field-reports/:id" element={<ReportDetail />} />
+          {/* Field Reports */}
+          <Route path="field-reports">
+            <Route index element={<FieldReportsList />} />
+            <Route path="new" element={<FieldReportForm />} />
+            <Route path=":id" element={<ReportDetail />} />
+          </Route>
 
           {/* ==========================================
               ADMIN ROUTES
@@ -163,22 +184,8 @@ function App() {
               LEGACY ROUTES - REDIRECTS
               ========================================== */}
           <Route 
-            path="under-maintenance" 
-            element={<Navigate to="/dashboard/maintenance-logs" replace />} 
-          />
-          <Route 
-            path="logs" 
-            element={<Navigate to="/dashboard/maintenance-logs" replace />} 
-          />
-          
-          {/* Redirect old equipment routes */}
-          <Route 
             path="all-equipment" 
             element={<Navigate to="/dashboard/equipment" replace />} 
-          />
-          <Route 
-            path="my-requests" 
-            element={<Navigate to="/dashboard/recent-requests" replace />} 
           />
         </Route>
 

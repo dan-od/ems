@@ -1,3 +1,4 @@
+// ems-frontend/src/components/Dashboard/Widgets/QuickActions.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Widgets.css';
@@ -9,17 +10,17 @@ const QuickActions = ({ role }) => {
     {
       icon: '🚗',
       label: 'Request Transport',
-      action: () => navigate('/dashboard/requests/transport', { state: { type: 'transport' } })
+      action: () => navigate('/dashboard/requests/transport')
     },
     {
       icon: '🔧',
       label: 'Report Equipment Issue',
-      action: () => navigate('/dashboard/requests/maintenance', { state: { type: 'maintenance' } })
+      action: () => navigate('/dashboard/requests/maintenance')
     },
     {
       icon: '🦺',
       label: 'Request PPE',
-      action: () => navigate('/dashboard/requests/ppe', { state: { type: 'ppe' } })
+      action: () => navigate('/dashboard/requests/ppe')
     },
     {
       icon: '📝',
@@ -78,22 +79,22 @@ const QuickActions = ({ role }) => {
     {
       icon: '🖥️',
       label: 'IT Support',
-      action: () => navigate('/dashboard/requests', { state: { type: 'it' } })
+      action: () => navigate('/dashboard/requests/it')
     },
     {
       icon: '🗂️',
       label: 'Office Supplies',
-      action: () => navigate('/dashboard/requests', { state: { type: 'material' } })
+      action: () => navigate('/dashboard/requests/material')
     },
     {
       icon: '🚗',
       label: 'Transport Booking',
-      action: () => navigate('/dashboard/requests', { state: { type: 'transport' } })
+      action: () => navigate('/dashboard/requests/transport')
     },
     {
       icon: '💰',
       label: 'Travel Advance',
-      action: () => navigate('/dashboard/requests', { state: { type: 'finance' } })
+      action: () => navigate('/dashboard/requests/finance')
     }
   ];
 
@@ -118,6 +119,7 @@ const QuickActions = ({ role }) => {
             key={index}
             className="quick-action-btn"
             onClick={action.action}
+            type="button"
           >
             <span className="action-icon">{action.icon}</span>
             <span className="action-label">{action.label}</span>

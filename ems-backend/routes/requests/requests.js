@@ -461,37 +461,34 @@ router.post('/v2', authenticateJWT(), async (req, res) => {
 
 
 // Get all requests created by the logged-in user (their history)
-router.get('/my-requests',
-  authenticateJWT(),
-  async (req, res) => {
-    try {
-      console.log('👤 Fetching requests for user:', req.user);
-
-      const { rows } = await pool.query(`
-        SELECT 
-          r.*,
-          u1.name as requested_by_name,
-          u2.name as approved_by_name,
-          d.name  as department_name,
-          td.name as transferred_to_department_name,
-          ut.name as transferred_by_name
-        FROM requests r
-        LEFT JOIN users u1 ON r.requested_by = u1.id
-        LEFT JOIN users u2 ON r.approved_by = u2.id
-        LEFT JOIN departments d  ON r.department_id = d.id
-        LEFT JOIN departments td ON r.transferred_to_department = td.id
-        LEFT JOIN users ut ON r.transferred_by = ut.id
-        WHERE r.requested_by = $1
-        ORDER BY r.created_at DESC
-      `, [req.user.id]);
-
-      res.json(rows);
-    } catch (err) {
-      console.error('❌ Fetch my requests error:', err);
-      res.status(500).json({ error: 'Failed to fetch your requests' });
-    }
+router.get('/my-requests', authenticateJWT(), async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const query = `
+      SELECT DISTINCT ON (r.id)
+        r.*,
+        d.name as department_name,
+        u.name as requested_by_name,
+        CASE 
+          WHEN r.is_new_equipment = true THEN r.new_equipment_name 
+          ELSE e.name 
+        END as equipment_name
+      FROM requests r
+      LEFT JOIN departments d ON r.department_id = d.id
+      LEFT JOIN users u ON r.requested_by = u.id
+      LEFT JOIN equipment e ON r.equipment_id = e.id
+      WHERE r.requested_by = $1
+      ORDER BY r.id, r.created_at DESC
+    `;
+    
+    const result = await pool.query(query, [userId]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Failed to fetch user requests:', err);
+    res.status(500).json({ error: 'Failed to fetch requests' });
   }
-);
+});
 
 
 
