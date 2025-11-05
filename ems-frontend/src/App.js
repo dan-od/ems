@@ -1,48 +1,54 @@
-// src/App.js
+// src/App.js - CORRECTED VERSION (matches actual file structure)
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-// Auth
+// ============================================
+// AUTH
+// ============================================
 import Login from './components/Auth/Login';
 
-// Dashboard Layout
-import Dashboard from './components/Dashboard/Dashboard';
+// ============================================
+// DASHBOARD LAYOUT
+// ============================================
+import Dashboard from './components/Dashboard/dashboard';
 import DashboardHome from './components/Dashboard/DashboardHome';
 
-// Equipment
-import AllEquipment from './components/Equipment/AllEquipment';
-import EquipmentDetail from './components/Equipment/EquipmentDetail';
+// ============================================
+// EQUIPMENT (Using actual files that exist)
+// ============================================
+import EquipmentList from './components/Equipment/EquipmentList';
+import MaintenanceLog from './components/Equipment/MaintenanceLog';
 
-// Maintenance Logs (Equipment service history)
-import MaintenanceLogs from './components/Equipment/MaintenanceLog'; // Or wherever it's located
-
-// Requests
+// ============================================
+// REQUESTS (Using actual files that exist)
+// ============================================
 import RequestHub from './components/RequestHub/RequestHub';
-import MyRequests from './components/Requests/MyRequests';
+import RequestList from './components/Requests/RequestList';
+import RecentRequests from './components/Requests/RecentRequests';
 import ManagerRequests from './components/Requests/ManagerRequests';
+import RequestDetail from './components/Requests/RequestDetail';
 
-// Reports & Activity
-import ActivityFeed from './components/Reports/ActivityFeed'; // ✅ NEW - You'll create this
-import DepartmentReports from './components/Reports/DepartmentReports'; // ✅ For manager/admin
-
-// Field Reports
-import FieldReports from './components/FieldReports/FieldReports';
-
-// Users (Admin)
-import Users from './components/User/Users';
-import AddUser from './components/User/AddUser';
-
+// ============================================
+// REPORTS & ACTIVITY
+// ============================================
 import { 
-  ReportsList as FieldReports,
+  ReportsList as FieldReportsList,
   FieldReportForm,
   ReportDetail,
   EquipmentMaintenanceLogs,
-  ActivityFeed,           // ⭐ NEW
-  DepartmentReports       // ⭐ NEW
+  ActivityFeed,
+  DepartmentReports
 } from './components/Reports';
 
+// ============================================
+// USERS (ADMIN) - Using actual files
+// ============================================
+import UserManagement from './components/User/UserManagement';
+import AddUser from './components/User/AddUser';
 
-// Protected Route Component
+// ============================================
+// PROTECTED ROUTE COMPONENT
+// ============================================
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const token = localStorage.getItem('token');
   const userRole = localStorage.getItem('userRole');
@@ -58,14 +64,21 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
+// ============================================
+// MAIN APP
+// ============================================
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Route */}
+        {/* ==========================================
+            PUBLIC ROUTES
+            ========================================== */}
         <Route path="/" element={<Login />} />
 
-        {/* Protected Dashboard Routes */}
+        {/* ==========================================
+            PROTECTED DASHBOARD ROUTES
+            ========================================== */}
         <Route
           path="/dashboard"
           element={
@@ -80,19 +93,18 @@ function App() {
           {/* ==========================================
               EQUIPMENT ROUTES
               ========================================== */}
-          <Route path="all-equipment" element={<AllEquipment />} />
-          <Route path="equipment/:id" element={<EquipmentDetail />} />
-          
-          {/* Equipment Maintenance Logs */}
-          <Route path="maintenance-logs" element={<MaintenanceLogs />} />
+          <Route path="equipment" element={<EquipmentList />} />
+          <Route path="maintenance-logs" element={<MaintenanceLog />} />
 
           {/* ==========================================
               REQUEST ROUTES
               ========================================== */}
           <Route path="requests" element={<RequestHub />} />
-          <Route path="my-requests" element={<MyRequests />} />
+          <Route path="all-requests" element={<RequestList />} />
+          <Route path="recent-requests" element={<RecentRequests />} />
+          <Route path="request/:id" element={<RequestDetail />} />
           
-          {/* Manager/Admin Only */}
+          {/* Manager/Admin Only - Department Requests */}
           <Route
             path="manager-requests"
             element={
@@ -106,8 +118,11 @@ function App() {
               REPORTING & MONITORING ROUTES
               ========================================== */}
           
-          {/* Activity Feed - All user actions (NEW) */}
+          {/* Activity Feed - All user actions */}
           <Route path="activity-feed" element={<ActivityFeed />} />
+          
+          {/* Equipment Maintenance Logs - Historical logs */}
+          <Route path="equipment-maintenance-logs" element={<EquipmentMaintenanceLogs />} />
           
           {/* Department Reports - Manager/Admin Only */}
           <Route
@@ -119,9 +134,10 @@ function App() {
             }
           />
 
-
           {/* Field Reports - Job site reports */}
-          <Route path="field-reports" element={<FieldReports />} />
+          <Route path="field-reports" element={<FieldReportsList />} />
+          <Route path="field-reports/new" element={<FieldReportForm />} />
+          <Route path="field-reports/:id" element={<ReportDetail />} />
 
           {/* ==========================================
               ADMIN ROUTES
@@ -130,7 +146,7 @@ function App() {
             path="users"
             element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <Users />
+                <UserManagement />
               </ProtectedRoute>
             }
           />
@@ -144,14 +160,31 @@ function App() {
           />
 
           {/* ==========================================
-              LEGACY/OLD ROUTES - REDIRECTS
+              LEGACY ROUTES - REDIRECTS
               ========================================== */}
-          {/* Redirect old routes to new ones */}
-          <Route path="under-maintenance" element={<Navigate to="/dashboard/maintenance-logs" replace />} />
-          <Route path="logs" element={<Navigate to="/dashboard/maintenance-logs" replace />} />
+          <Route 
+            path="under-maintenance" 
+            element={<Navigate to="/dashboard/maintenance-logs" replace />} 
+          />
+          <Route 
+            path="logs" 
+            element={<Navigate to="/dashboard/maintenance-logs" replace />} 
+          />
+          
+          {/* Redirect old equipment routes */}
+          <Route 
+            path="all-equipment" 
+            element={<Navigate to="/dashboard/equipment" replace />} 
+          />
+          <Route 
+            path="my-requests" 
+            element={<Navigate to="/dashboard/recent-requests" replace />} 
+          />
         </Route>
 
-        {/* Catch all - redirect to login */}
+        {/* ==========================================
+            CATCH ALL - REDIRECT TO LOGIN
+            ========================================== */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

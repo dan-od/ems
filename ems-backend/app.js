@@ -15,6 +15,7 @@ const departmentRoutes = require('./routes/departments');
 const maintenanceRequestRoutes = require('./routes/maintenanceRequests');
 const statsRoutes = require('./routes/stats/managerStats');
 const adminStatsRoutes = require('./routes/stats/adminStats');
+const activityLogsRoutes = require('./routes/activityLogs');
 
 const app = express();
 
@@ -87,6 +88,9 @@ console.log('  ✅ Stats (Manager)');
 
 app.use('/api/stats', adminStatsRoutes);
 console.log('  ✅ Stats (Admin)');
+
+app.use('/api/activity-logs', activityLogsRoutes);
+console.log('  ✅ Activity Logs');
 
 console.log('✅ All routes registered\n');
 

@@ -1,24 +1,36 @@
+// src/components/Dashboard/DashboardHome.js
 import React from 'react';
 import EngineerDashboard from './RoleSpecific/EngineerDashboard';
-import { Navigate } from 'react-router-dom';
+import ManagerDashboard from './RoleSpecific/ManagerDashboard';
+import AdminDashboard from './RoleSpecific/AdminDashboard';
+import StaffDashboard from './RoleSpecific/StaffDashboard';
 
 const DashboardHome = () => {
   const userRole = localStorage.getItem('userRole') || '';
 
-  // For now, only Engineer dashboard is implemented
-  // Others will redirect to old dashboard temporarily
-  if (userRole === 'engineer') {
-    return <EngineerDashboard />;
+  // Route to appropriate role-specific dashboard
+  switch (userRole) {
+    case 'engineer':
+      return <EngineerDashboard />;
+    
+    case 'manager':
+      return <ManagerDashboard />;
+    
+    case 'admin':
+      return <AdminDashboard />;
+    
+    case 'staff':
+      return <StaffDashboard />;
+    
+    default:
+      return (
+        <div className="coming-soon">
+          <h1>🚧 Dashboard Not Available</h1>
+          <p>Your role ({userRole}) does not have a dashboard configured.</p>
+          <p>Please contact your administrator or use the navigation menu to access features.</p>
+        </div>
+      );
   }
-
-  // For other roles, show coming soon message for now
-  return (
-    <div className="coming-soon">
-      <h1>🚧 {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Dashboard</h1>
-      <p>Your personalized dashboard is coming soon!</p>
-      <p>For now, please use the navigation menu to access features.</p>
-    </div>
-  );
 };
 
 export default DashboardHome;
