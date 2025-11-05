@@ -1,4 +1,6 @@
 // ems-frontend/src/components/Dashboard/Widgets/QuickActions.js
+// ONLY CHANGE THE ROUTES - Keep everything else the same
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Widgets.css';
@@ -10,22 +12,22 @@ const QuickActions = ({ role }) => {
     {
       icon: '🚗',
       label: 'Request Transport',
-      action: () => navigate('/dashboard/requests/transport')
+      action: () => navigate('/dashboard/requests/new?type=transport')  // FIXED ROUTE
     },
     {
       icon: '🔧',
       label: 'Report Equipment Issue',
-      action: () => navigate('/dashboard/requests/maintenance')
+      action: () => navigate('/dashboard/requests/new?type=equipment')  // FIXED ROUTE
     },
     {
       icon: '🦺',
       label: 'Request PPE',
-      action: () => navigate('/dashboard/requests/ppe')
+      action: () => navigate('/dashboard/requests/new?type=ppe')  // FIXED ROUTE
     },
     {
       icon: '📝',
       label: 'Submit Report',
-      action: () => navigate('/dashboard/field-reports')
+      action: () => navigate('/dashboard/field-reports/new')  // FIXED ROUTE - added /new
     }
   ];
 
@@ -79,22 +81,22 @@ const QuickActions = ({ role }) => {
     {
       icon: '🖥️',
       label: 'IT Support',
-      action: () => navigate('/dashboard/requests/it')
+      action: () => navigate('/dashboard/requests/new?type=it')  // FIXED ROUTE
     },
     {
       icon: '🗂️',
       label: 'Office Supplies',
-      action: () => navigate('/dashboard/requests/material')
+      action: () => navigate('/dashboard/requests/new?type=material')  // FIXED ROUTE
     },
     {
       icon: '🚗',
       label: 'Transport Booking',
-      action: () => navigate('/dashboard/requests/transport')
+      action: () => navigate('/dashboard/requests/new?type=transport')  // FIXED ROUTE
     },
     {
       icon: '💰',
       label: 'Travel Advance',
-      action: () => navigate('/dashboard/requests/finance')
+      action: () => navigate('/dashboard/requests/new?type=finance')  // FIXED ROUTE
     }
   ];
 
@@ -119,7 +121,7 @@ const QuickActions = ({ role }) => {
             key={index}
             className="quick-action-btn"
             onClick={action.action}
-            type="button"
+            type="button"  // Important: prevents form submission
           >
             <span className="action-icon">{action.icon}</span>
             <span className="action-label">{action.label}</span>

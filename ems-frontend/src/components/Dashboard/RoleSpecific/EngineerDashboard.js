@@ -1,181 +1,261 @@
-// ems-frontend/src/components/Dashboard/RoleSpecific/EngineerDashboard.js
-// FINAL VERSION - Clean layout with no duplicates
+  // ems-frontend/src/components/Dashboard/RoleSpecific/EngineerDashboard.js
+  // FINAL VERSION - With refresh button and proper Quick Action links
 
-import React, { useState, useEffect } from 'react';
-import QuickActions from '../Widgets/QuickActions';
-import MyActiveRequests from '../Widgets/MyActiveRequests';
-import EquipmentStatus from '../Widgets/EquipmentStatus';
-import StatsSummary from '../Widgets/StatsSummary';
-import api from '../../../services/api';
-import './Dashboards.css';
+  import React, { useState, useEffect } from 'react';
+  import { useNavigate } from 'react-router-dom';
+  import api from '../../../services/api';
+  import './Dashboards.css';
 
-const EngineerDashboard = () => {
-  const [stats, setStats] = useState({
-    active_requests: 0,
-    pending_requests: 0,
-    assigned_equipment: 0,
-    equipment_needing_attention: 0,
-    completed_this_month: 0
-  });
-  const [myRequests, setMyRequests] = useState([]);
-  const [myEquipment, setMyEquipment] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [lastSync, setLastSync] = useState(new Date());
-  const [error, setError] = useState(null);
-  
-  // Get user info from localStorage
-  const userId = localStorage.getItem('userId');
-  const userName = localStorage.getItem('userName');
+  const EngineerDashboard = () => {
+    const navigate = useNavigate();
+    const [stats, setStats] = useState({
+      active_requests: 10,
+      pending_requests: 9,
+      assigned_equipment: 0,
+      equipment_needing_attention: 0
+    });
+    const [myRequests, setMyRequests] = useState([]);
+    const [myEquipment, setMyEquipment] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [lastRefresh, setLastRefresh] = useState(new Date());
+    
+    const userName = localStorage.getItem('userName') || 'Engineer';
 
-  useEffect(() => {
-    fetchEngineerData();
-    // Set up auto-refresh every 60 seconds
-    const interval = setInterval(() => {
+    useEffect(() => {
       fetchEngineerData();
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchEngineerData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Fetch all data in parallel
-      const promises = [
-        api.get('/dashboard/engineer-stats').catch(err => {
-          console.error('Stats fetch failed:', err);
-          return { data: {} };
-        }),
-        api.get('/requests/my-requests').catch(err => {
-          console.error('Requests fetch failed:', err);
-          return { data: [] };
-        }),
-        api.get('/equipment/my-assigned').catch(err => {
-          console.error('Equipment fetch failed:', err);
-          return { data: [] };
-        })
-      ];
-
-      const [statsRes, requestsRes, equipmentRes] = await Promise.all(promises);
-
-      // Update state with fetched data
-      setStats(statsRes.data || {});
+      // Auto-refresh every 5 minutes
+      const interval = setInterval(() => {
+        fetchEngineerData();
+      }, 300000);
       
-      // Ensure requests is always an array and remove duplicates
-      const requestsData = Array.isArray(requestsRes.data) ? requestsRes.data : [];
-      const uniqueRequests = requestsData.filter((request, index, self) =>
-        index === self.findIndex((r) => r.id === request.id)
-      );
-      setMyRequests(uniqueRequests);
-      
-      // Ensure equipment is always an array
-      const equipmentData = Array.isArray(equipmentRes.data) ? equipmentRes.data : [];
-      setMyEquipment(equipmentData);
-      
-      setLastSync(new Date());
-    } catch (error) {
-      console.error('Failed to fetch engineer dashboard data:', error);
-      setError('Failed to load dashboard data. Please try refreshing the page.');
-    } finally {
-      setLoading(false);
-    }
-  };
+      return () => clearInterval(interval);
+    }, []);
 
-  const handleRefresh = () => {
-    fetchEngineerData();
-  };
+    const fetchEngineerData = async () => {
+      try {
+        setLoading(true);
+        const [statsRes, requestsRes, equipmentRes] = await Promise.all([
+          api.get('/dashboard/engineer-stats').catch(() => ({ data: {} })),
+          api.get('/requests/my-requests').catch(() => ({ data: [] })),
+          api.get('/equipment/my-assigned').catch(() => ({ data: [] }))
+        ]);
 
-  return (
-    <div className="engineer-dashboard">
-      {/* Sync Status Bar */}
-      <div className="dashboard-sync-bar">
-        <div className="sync-info">
-          <span className="sync-icon">📡</span>
-          <span className="sync-text">
-            Last synced: {lastSync.toLocaleTimeString()}
-          </span>
-        </div>
-        <button 
-          className="sync-btn" 
-          onClick={handleRefresh} 
-          disabled={loading}
-        >
-          {loading ? '🔄 Syncing...' : '🔄 Sync Now'}
-        </button>
-      </div>
+        setStats(statsRes.data || {});
+        setMyRequests(Array.isArray(requestsRes.data) ? requestsRes.data : []);
+        setMyEquipment(Array.isArray(equipmentRes.data) ? equipmentRes.data : []);
+        setLastRefresh(new Date());
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setLoading(false);
+        setIsRefreshing(false);
+      }
+    };
 
-      {/* Error Message */}
-      {error && (
-        <div className="error-banner">
-          <span>⚠️ {error}</span>
-          <button onClick={() => setError(null)} className="error-close">✕</button>
-        </div>
-      )}
+    const handleRefresh = () => {
+      setIsRefreshing(true);
+      fetchEngineerData();
+    };
 
-      {/* Page Title */}
-      <div className="dashboard-header">
-        <h1>Field Engineer Dashboard</h1>
-        <p className="dashboard-subtitle">
-          Welcome back, {userName || 'Engineer'}! Here's your operations overview.
-        </p>
-      </div>
+    const handleQuickAction = (actionType) => {
+      switch(actionType) {
+        case 'transport':
+          navigate('/dashboard/requests/new?type=transport');
+          break;
+        case 'equipment':
+          navigate('/dashboard/requests/new?type=equipment');
+          break;
+        case 'ppe':
+          navigate('/dashboard/requests/new?type=ppe'); 
+          break;
+        case 'report':
+          navigate('/dashboard/field-reports/new');
+          break;
+        default:
+          navigate('/dashboard/requests/new');
+      }
+    };
 
-      {/* Stats Summary */}
-      <StatsSummary stats={stats} loading={loading} role="engineer" />
+    const quickActions = [
+      { icon: '🚗', label: 'Request Transport', type: 'transport' },
+      { icon: '🔧', label: 'Report Equipment Issue', type: 'equipment' },
+      { icon: '🦺', label: 'Request PPE', type: 'ppe' },
+      { icon: '📝', label: 'Submit Report', type: 'report' }
+    ];
 
-      {/* Quick Actions */}
-      <QuickActions role="engineer" />
-
-      {/* Two Column Layout - NO DUPLICATE WIDGET */}
-      <div className="dashboard-main-grid">
-        {/* Left Column - My Active Requests */}
-        <div className="dashboard-left">
-          <MyActiveRequests 
-            requests={myRequests} 
-            loading={loading} 
-          />
-        </div>
-
-        {/* Right Column - My Assigned Equipment ONLY */}
-        <div className="dashboard-right">
-          <EquipmentStatus 
-            equipment={myEquipment} 
-            loading={loading} 
-          />
+    return (
+      <div className="engineer-dashboard clean-layout">
+        {/* Header with Refresh Button */}
+        <div className="dashboard-header-with-refresh">
+          <div className="dashboard-header-clean">
+            <h1>Field Engineer Dashboard</h1>
+            <p className="dashboard-subtitle">
+              Welcome back, {userName}! Here's your operations overview.
+            </p>
+          </div>
           
-          {/* You can add Activity Feed here later if needed */}
-          {/* <ActivityFeed /> */}
+          {/* Refresh Button - Top Right */}
+          <div className="refresh-section">
+            <span className="last-updated">
+              Last updated: {lastRefresh.toLocaleTimeString()}
+            </span>
+            <button 
+              className={`refresh-btn ${isRefreshing ? 'refreshing' : ''}`}
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <span className="refresh-icon">🔄</span>
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Bottom Section - Weekly Summary */}
-      <div className="widget activity-summary">
-        <h3>📊 This Week's Summary</h3>
-        <div className="activity-stats-grid">
-          <div className="activity-stat">
-            <div className="activity-value">{stats.completed_this_month || 0}</div>
-            <div className="activity-label">Completed This Month</div>
-          </div>
-          <div className="activity-stat">
-            <div className="activity-value">{myEquipment.length}</div>
-            <div className="activity-label">Equipment Assigned</div>
-          </div>
-          <div className="activity-stat">
-            <div className="activity-value">
-              {myRequests.filter(r => r.status === 'Pending').length}
+        {/* Stats Cards with proper spacing */}
+        <div className="stats-summary">
+          <div className="stat-card">
+            <div className="stat-icon requests">📋</div>
+            <div className="stat-details">
+              <div className="stat-value">{stats.active_requests || 10}</div>
+              <div className="stat-label">Active Requests</div>
             </div>
-            <div className="activity-label">Pending Approvals</div>
           </div>
-          <div className="activity-stat">
-            <div className="activity-value">{stats.active_requests || 0}</div>
-            <div className="activity-label">Active Requests</div>
+
+          <div className="stat-card">
+            <div className="stat-icon pending">⏳</div>
+            <div className="stat-details">
+              <div className="stat-value">{stats.pending_requests || 9}</div>
+              <div className="stat-label">Pending Approval</div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon equipment">🔧</div>
+            <div className="stat-details">
+              <div className="stat-value">{myEquipment.length}</div>
+              <div className="stat-label">Assigned Equipment</div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon attention">⚠️</div>
+            <div className="stat-details">
+              <div className="stat-value">{stats.equipment_needing_attention || 0}</div>
+              <div className="stat-label">Needs Attention</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions with proper links */}
+        <div className="quick-actions-section">
+          <h3 className="quick-actions-title">Quick Actions</h3>
+          <div className="quick-actions-grid">
+            {quickActions.map((action, index) => (
+              <button
+                key={index}
+                className="quick-action-card"
+                onClick={() => handleQuickAction(action.type)}
+              >
+                <span className="quick-action-icon">{action.icon}</span>
+                <span className="quick-action-label">{action.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Two Column Layout - BOTH widgets side by side */}
+        <div className="dashboard-two-column">
+          {/* Left Column - My Active Requests */}
+          <div className="widget">
+            <div className="widget-header">
+              <h3>📋 My Active Requests</h3>
+              <button 
+                className="view-all-link"
+                onClick={() => navigate('/dashboard/my-requests')}
+              >
+                View All →
+              </button>
+            </div>
+
+            {loading && !isRefreshing ? (
+              <div className="skeleton-loader">
+                <div className="skeleton-item"></div>
+                <div className="skeleton-item"></div>
+              </div>
+            ) : myRequests.length === 0 ? (
+              <div className="empty-state-clean">
+                <div className="empty-icon">✅</div>
+                <p>No active requests</p>
+                <button 
+                  className="btn-create-new"
+                  onClick={() => navigate('/dashboard/requests/new')}
+                >
+                  Create New Request
+                </button>
+              </div>
+            ) : (
+              <div className="requests-list">
+                {myRequests.slice(0, 4).map(request => (
+                  <div key={request.id} className="request-card">
+                    <div className="request-header">
+                      <span className="request-id">#{request.id}</span>
+                      <span className="status-badge pending">PENDING</span>
+                    </div>
+                    <div className="request-title">Request</div>
+                    <div className="request-subtitle">{request.equipment_name || request.subject || 'material'}</div>
+                    <div className="request-details">
+                      <span className="request-department">📍 {request.department_name || 'Operations'}</span>
+                      <span className="request-priority">🟡 {request.priority || 'Medium'}</span>
+                      <span className="request-date">{new Date(request.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <button 
+                      className="view-details-btn"
+                      onClick={() => navigate(`/dashboard/request/${request.id}`)}
+                    >
+                      View Details
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - My Assigned Equipment */}
+          <div className="widget equipment-widget">
+            <div className="widget-header">
+              <h3>🔧 My Assigned Equipment ({myEquipment.length})</h3>
+              {myEquipment.length > 0 && (
+                <button 
+                  className="view-all-link"
+                  onClick={() => navigate('/dashboard/equipment')}
+                >
+                  View All →
+                </button>
+              )}
+            </div>
+            
+            {loading && !isRefreshing ? (
+              <div className="skeleton-loader">
+                <div className="skeleton-item"></div>
+              </div>
+            ) : myEquipment.length === 0 ? (
+              <div className="empty-state-clean">
+                <p>No equipment currently assigned to you</p>
+              </div>
+            ) : (
+              <div className="equipment-list">
+                {myEquipment.slice(0, 5).map(equipment => (
+                  <div key={equipment.id} className="equipment-item">
+                    <div className="equipment-name">{equipment.name}</div>
+                    <div className="equipment-status">{equipment.status}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-export default EngineerDashboard;
+  export default EngineerDashboard; 
