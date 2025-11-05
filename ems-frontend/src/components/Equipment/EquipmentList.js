@@ -1,15 +1,24 @@
+// ems-frontend/src/components/Equipment/EquipmentList.js
+// UPDATED - Request Hub style header card
+
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { equipmentService } from '../../services/api';
 import EquipmentForm from './EquipmentForm';
+import './EquipmentList.css';
 
 const EquipmentList = () => {
+  const navigate = useNavigate();
   const [equipment, setEquipment] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('All Status');
+
+  const userRole = localStorage.getItem('userRole');
+  const canModify = userRole === 'admin' || userRole === 'manager';
 
   const fetchEquipment = async () => {
     try {
@@ -43,166 +52,205 @@ const EquipmentList = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const handleViewLogs = (id, name) => {
+    const encodedName = encodeURIComponent(name);
+    navigate(`/dashboard/maintenance-logs?equipment=${id}&name=${encodedName}`);
+  };
+
+  const getStatusBadge = (status) => {
     switch (status?.toLowerCase()) {
       case 'operational':
-      case 'available':
-        return 'bg-green-100 text-green-800';
+        return 'status-operational';
       case 'maintenance':
-      case 'under_maintenance':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'status-maintenance';
       case 'retired':
-        return 'bg-red-100 text-red-800';
+        return 'status-retired';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'status-default';
     }
   };
 
   const filteredEquipment = equipment.filter(item => {
     const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.location?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || item.status?.toLowerCase() === statusFilter.toLowerCase();
+    const matchesStatus = statusFilter === 'All Status' || 
+                         item.status?.toLowerCase() === statusFilter.toLowerCase();
     return matchesSearch && matchesStatus;
   });
 
-  if (loading) return <div className="flex justify-center items-center h-64">Loading equipment...</div>;
-  if (error) return <div className="text-red-500 text-center">{error}</div>;
+  if (loading) return (
+    <div className="loading-container">
+      <div className="spinner"></div>
+      <div>Loading equipment...</div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="error-container">
+      <div className="error-message">{error}</div>
+    </div>
+  );
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <h1 className="text-2xl font-bold">All Equipment</h1>
-        <button
-          onClick={() => {
-            setSelectedEquipment(null);
-            setShowForm(true);
-          }}
-          className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors"
-        >
-          + Add Equipment
-        </button>
+    <div className="equipment-page">
+      {/* ✅ Request Hub Style Header Card */}
+      <div className="page-header-card">
+        <div className="header-content">
+          <h1 className="page-title">All Equipment</h1>
+          <p className="page-subtitle">
+            Manage and track all equipment, maintenance logs, and assignments
+          </p>
+        </div>
+        {canModify && (
+          <button
+            onClick={() => {
+              setSelectedEquipment(null);
+              setShowForm(true);
+            }}
+            className="btn-add-new"
+          >
+            + Add Equipment
+          </button>
+        )}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col lg:flex-row gap-4">
-        <input
-          type="text"
-          placeholder="Search equipment..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-        />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-        >
-          <option value="all">All Status</option>
-          <option value="operational">Operational</option>
-          <option value="maintenance">Maintenance</option>
-          <option value="retired">Retired</option>
-        </select>
+      {/* Filters Section */}
+      <div className="filters-section">
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Search equipment..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
+        <div className="filter-dropdown">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option>All Status</option>
+            <option>Operational</option>
+            <option>Maintenance</option>
+            <option>Retired</option>
+          </select>
+        </div>
       </div>
 
-      {/* Desktop: Table View */}
-      <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
+      {/* Table */}
+      <div className="table-container">
+        <table className="data-table">
+          <thead>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Maintained</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              <th>NAME</th>
+              <th>STATUS</th>
+              <th>LOCATION</th>
+              <th>LAST MAINTAINED</th>
+              <th>ACTIONS</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredEquipment.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 font-medium">{item.name}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4">{item.location || '—'}</td>
-                <td className="px-6 py-4">
-                  {item.last_maintained 
-                    ? new Date(item.last_maintained).toLocaleDateString() 
-                    : '—'}
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(item)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
+          <tbody>
+            {filteredEquipment.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="no-data">
+                  No equipment found. {searchTerm && 'Try adjusting your search.'}
                 </td>
               </tr>
-            ))}
+            ) : (
+              filteredEquipment.map((item) => (
+                <tr key={item.id}>
+                  <td className="equipment-name">{item.name}</td>
+                  <td>
+                    <span className={`status-badge ${getStatusBadge(item.status)}`}>
+                      {item.status?.toUpperCase() || 'UNKNOWN'}
+                    </span>
+                  </td>
+                  <td>{item.location || '—'}</td>
+                  <td>
+                    {item.last_maintained 
+                      ? new Date(item.last_maintained).toLocaleDateString() 
+                      : '—'}
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button
+                        onClick={() => handleViewLogs(item.id, item.name)}
+                        className="btn-action btn-view"
+                      >
+                        View Logs
+                      </button>
+                      {canModify && (
+                        <>
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="btn-action btn-edit"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="btn-action btn-delete"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Mobile: Card View */}
-      <div className="lg:hidden space-y-4">
+      {/* Mobile Cards */}
+      <div className="mobile-cards">
         {filteredEquipment.map((item) => (
-          <div key={item.id} className="bg-white rounded-lg shadow p-4 space-y-3">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg">{item.name}</h3>
-                <p className="text-sm text-gray-600">{item.location || 'No location'}</p>
-              </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
-                {item.status}
+          <div key={item.id} className="equipment-card">
+            <div className="card-header">
+              <h3 className="equipment-name">{item.name}</h3>
+              <span className={`status-badge ${getStatusBadge(item.status)}`}>
+                {item.status?.toUpperCase() || 'UNKNOWN'}
               </span>
             </div>
-
-            <div className="text-sm">
-              <div className="flex justify-between py-2 border-t">
-                <span className="text-gray-600">Last Maintained:</span>
-                <span className="font-medium">
-                  {item.last_maintained 
-                    ? new Date(item.last_maintained).toLocaleDateString() 
-                    : 'Never'}
-                </span>
-              </div>
+            <div className="card-body">
+              <p><strong>Location:</strong> {item.location || 'Not specified'}</p>
+              <p><strong>Last Maintained:</strong> {
+                item.last_maintained 
+                  ? new Date(item.last_maintained).toLocaleDateString() 
+                  : 'Never'
+              }</p>
             </div>
-
-            <div className="flex gap-2 pt-2">
+            <div className="card-actions">
               <button
-                onClick={() => handleEdit(item)}
-                className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                onClick={() => handleViewLogs(item.id, item.name)}
+                className="btn-action btn-view"
               >
-                Edit
+                View Logs
               </button>
-              <button
-                onClick={() => handleDelete(item.id)}
-                className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
-              >
-                Delete
-              </button>
+              {canModify && (
+                <>
+                  <button
+                    onClick={() => handleEdit(item)}
+                    className="btn-action btn-edit"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="btn-action btn-delete"
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
             </div>
           </div>
         ))}
       </div>
-
-      {/* Empty State */}
-      {filteredEquipment.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          No equipment found. {searchTerm && 'Try adjusting your search.'}
-        </div>
-      )}
 
       {/* Form Modal */}
       {showForm && (

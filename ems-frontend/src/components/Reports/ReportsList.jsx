@@ -1,5 +1,5 @@
 // ems-frontend/src/components/Reports/FieldReports.js
-// FIXED VERSION - Proper routing for Field Reports
+// UPDATED - Request Hub style header card
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -34,29 +34,26 @@ const FieldReports = () => {
   };
 
   const handleNewReport = () => {
-    // Use absolute path for navigation
     navigate('/dashboard/field-reports/new');
   };
 
   const handleViewReport = (reportId) => {
-    // Use absolute path for navigation
     navigate(`/dashboard/field-reports/${reportId}`);
   };
 
   const handleEditReport = (reportId) => {
-    // Use absolute path for navigation
     navigate(`/dashboard/field-reports/edit/${reportId}`);
   };
 
   const getStatusBadge = (status) => {
     const statusMap = {
-      'Draft': 'badge-gray',
-      'Submitted': 'badge-yellow',
-      'Reviewed': 'badge-blue',
-      'Approved': 'badge-green',
-      'Rejected': 'badge-red'
+      'Draft': 'status-draft',
+      'Submitted': 'status-submitted',
+      'Reviewed': 'status-reviewed',
+      'Approved': 'status-approved',
+      'Rejected': 'status-rejected'
     };
-    return statusMap[status] || 'badge-default';
+    return statusMap[status] || 'status-default';
   };
 
   const formatDate = (dateString) => {
@@ -69,12 +66,10 @@ const FieldReports = () => {
   };
 
   const filteredReports = reports.filter(report => {
-    // Apply status filter
     if (filter !== 'all' && report.status?.toLowerCase() !== filter) {
       return false;
     }
     
-    // Apply search filter
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       return (
@@ -98,14 +93,16 @@ const FieldReports = () => {
 
   return (
     <div className="reports-container">
-      {/* Header */}
-      <div className="reports-header">
-        <div>
-          <h1>Field Reports</h1>
-          <p className="subtitle">Job site reports and documentation</p>
+      {/* ✅ Request Hub Style Header Card */}
+      <div className="page-header-card">
+        <div className="header-content">
+          <h1 className="page-title">Field Reports</h1>
+          <p className="page-subtitle">
+            Job site reports, documentation, and field engineer submissions
+          </p>
         </div>
         <button 
-          className="btn-primary"
+          className="btn-add-new"
           onClick={handleNewReport}
         >
           + New Report
@@ -116,44 +113,46 @@ const FieldReports = () => {
       <div className="filters-section">
         <div className="filter-tabs">
           <button 
-            className={filter === 'all' ? 'active' : ''}
+            className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
             onClick={() => setFilter('all')}
           >
             All ({reports.length})
           </button>
           <button 
-            className={filter === 'submitted' ? 'active' : ''}
+            className={`filter-tab ${filter === 'submitted' ? 'active' : ''}`}
             onClick={() => setFilter('submitted')}
           >
             Submitted ({reports.filter(r => r.status === 'Submitted').length})
           </button>
           <button 
-            className={filter === 'approved' ? 'active' : ''}
+            className={`filter-tab ${filter === 'approved' ? 'active' : ''}`}
             onClick={() => setFilter('approved')}
           >
             Approved ({reports.filter(r => r.status === 'Approved').length})
           </button>
           <button 
-            className={filter === 'draft' ? 'active' : ''}
+            className={`filter-tab ${filter === 'draft' ? 'active' : ''}`}
             onClick={() => setFilter('draft')}
           >
             Drafts ({reports.filter(r => r.status === 'Draft').length})
           </button>
         </div>
         
-        <div className="search-box">
+        <div className="search-bar">
           <input
             type="text"
             placeholder="Search reports..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
           />
         </div>
       </div>
 
-      {/* Reports List/Table */}
+      {/* Reports Table */}
       {filteredReports.length === 0 ? (
         <div className="empty-state">
+          <div className="empty-icon">📋</div>
           <h3>No field reports found</h3>
           <p>
             {filter !== 'all' 
@@ -168,23 +167,23 @@ const FieldReports = () => {
           </button>
         </div>
       ) : (
-        <div className="reports-table-wrapper">
-          <table className="reports-table">
+        <div className="table-container">
+          <table className="data-table">
             <thead>
               <tr>
-                <th>Report ID</th>
-                <th>Title</th>
-                <th>Job Site</th>
-                <th>Date</th>
-                <th>Submitted By</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>ID</th>
+                <th>TITLE</th>
+                <th>JOB SITE</th>
+                <th>DATE</th>
+                <th>SUBMITTED BY</th>
+                <th>STATUS</th>
+                <th>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
               {filteredReports.map(report => (
                 <tr key={report.id}>
-                  <td>#{report.id}</td>
+                  <td className="report-id">#{report.id}</td>
                   <td className="report-title">
                     {report.title || 'Untitled Report'}
                   </td>
@@ -192,21 +191,21 @@ const FieldReports = () => {
                   <td>{formatDate(report.report_date || report.created_at)}</td>
                   <td>{report.submitted_by_name || 'Unknown'}</td>
                   <td>
-                    <span className={`badge ${getStatusBadge(report.status)}`}>
+                    <span className={`status-badge ${getStatusBadge(report.status)}`}>
                       {report.status || 'Draft'}
                     </span>
                   </td>
                   <td>
                     <div className="action-buttons">
                       <button
-                        className="btn-view"
+                        className="btn-action btn-view"
                         onClick={() => handleViewReport(report.id)}
                       >
                         View
                       </button>
                       {(report.status === 'Draft' && report.submitted_by === userId) && (
                         <button
-                          className="btn-edit"
+                          className="btn-action btn-edit"
                           onClick={() => handleEditReport(report.id)}
                         >
                           Edit

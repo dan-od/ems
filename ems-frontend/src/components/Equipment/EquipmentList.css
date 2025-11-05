@@ -1,82 +1,425 @@
-/* Equipment List Styles */
-.equipment-list {
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  
-  .equipment-list h3 {
-    color: #FF7F00;
-    margin-bottom: 20px;
-  }
-  
-  .table-responsive {
-    overflow-x: auto;
-  }
-  
-  .equipment-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .equipment-table th, 
-  .equipment-table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .equipment-table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-  }
-  
-  .status-badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.8em;
-    font-weight: 500;
-  }
-  
-  .status-badge.active {
-    background-color: #e6f7ee;
-    color: #28a745;
-  }
-  
-  .status-badge.inactive {
-    background-color: #feeae9;
-    color: #dc3545;
-  }
-  
-  .loading-indicator {
-    text-align: center;
-    padding: 20px;
-    color: #FF7F00;
-  }
-  
-  .error-message {
-    color: #dc3545;
-    padding: 10px;
-    background: #feeae9;
-    border-radius: 4px;
-  }
-  
-  .no-data {
-    text-align: center;
-    color: #6c757d;
+/* ems-frontend/src/components/Equipment/EquipmentList.css */
+/* UPDATED - Request Hub style header card */
+
+/* ============================================================================
+   PAGE LAYOUT
+   ============================================================================ */
+.equipment-page {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* ============================================================================
+   REQUEST HUB STYLE HEADER CARD - NEW!
+   ============================================================================ */
+.page-header-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.page-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.025em;
+}
+
+.page-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Add Equipment Button - Orange */
+.btn-add-new {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(255, 107, 53, 0.2);
+  white-space: nowrap;
+}
+
+.btn-add-new:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 107, 53, 0.3);
+}
+
+/* ============================================================================
+   FILTERS SECTION
+   ============================================================================ */
+.filters-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.search-bar {
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: white;
+  transition: all 0.2s;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.filter-dropdown {
+  min-width: 150px;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+/* ============================================================================
+   TABLE STYLES
+   ============================================================================ */
+.table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead {
+  background: #f9fafb;
+}
+
+.data-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.15s;
+}
+
+.data-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.data-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.data-table td {
+  padding: 1rem 1.5rem;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.equipment-name {
+  font-weight: 600;
+  color: #1a202c;
+}
+
+/* ============================================================================
+   STATUS BADGES
+   ============================================================================ */
+.status-badge {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.status-operational {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-maintenance {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-retired {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-default {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* ============================================================================
+   ACTION BUTTONS
+   ============================================================================ */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-action {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+}
+
+.btn-view {
+  background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+}
+
+.btn-view:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(255, 107, 53, 0.2);
+}
+
+.btn-edit {
+  background: #3b82f6;
+}
+
+.btn-edit:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.btn-delete {
+  background: #ef4444;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+/* ============================================================================
+   LOADING & ERROR STATES
+   ============================================================================ */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  gap: 1rem;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #f3f4f6;
+  border-top-color: #ff6b35;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-container {
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.error-message {
+  color: #dc3545;
+  padding: 1rem;
+  background: #feeae9;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* ============================================================================
+   MOBILE CARD VIEW
+   ============================================================================ */
+.mobile-cards {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .table-container {
+    display: none;
   }
 
-  .equipment-list-container {
-    max-height: 500px;  /* set desired max height */
-    overflow-y: auto;   /* enable scrolling within the container */
-    position: relative; /* needed for sticky to work in some browsers */
+  .mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
-  
-  .equipment-table thead th {
-    position: sticky;
-    top: 0; 
-    background-color: #f8f9fa; /* match your header color */
-    z-index: 2;               /* ensure the header is above row cells */
+
+  .equipment-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   }
-  
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .card-body {
+    margin-bottom: 1rem;
+  }
+
+  .card-body p {
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .card-body strong {
+    color: #374151;
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .card-actions .btn-action {
+    flex: 1;
+    padding: 0.625rem;
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+@media (max-width: 768px) {
+  .equipment-page {
+    padding: 1rem;
+  }
+
+  .page-header-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.75rem;
+  }
+
+  .btn-add-new {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filters-section {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .search-bar {
+    max-width: 100%;
+  }
+
+  .filter-dropdown {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .btn-action {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}

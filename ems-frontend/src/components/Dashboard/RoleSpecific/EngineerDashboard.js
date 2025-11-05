@@ -61,13 +61,13 @@
     const handleQuickAction = (actionType) => {
       switch(actionType) {
         case 'transport':
-          navigate('/dashboard/requests/new?type=transport');
+          navigate('/dashboard/requests/transport');
           break;
         case 'equipment':
-          navigate('/dashboard/requests/new?type=equipment');
+          navigate('/dashboard/requests/equipment');
           break;
         case 'ppe':
-          navigate('/dashboard/requests/new?type=ppe'); 
+          navigate('/dashboard/requests/ppe'); 
           break;
         case 'report':
           navigate('/dashboard/field-reports/new');
@@ -89,7 +89,7 @@
         {/* Header with Refresh Button */}
         <div className="dashboard-header-with-refresh">
           <div className="dashboard-header-clean">
-            <h1>Field Engineer Dashboard</h1>
+            <h1>Engineer Dashboard</h1>
             <p className="dashboard-subtitle">
               Welcome back, {userName}! Here's your operations overview.
             </p>

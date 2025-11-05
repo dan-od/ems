@@ -1,3 +1,6 @@
+// ems-frontend/src/components/Reports/FieldReportForm.jsx
+// UPDATED - Request Hub style header card
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
@@ -109,8 +112,14 @@ const FieldReportForm = () => {
 
   return (
     <div className="field-report-form-container">
-      <div className="form-header">
-        <h1>Submit Field Report</h1>
+      {/* ✅ Request Hub Style Header Card */}
+      <div className="page-header-card">
+        <div className="header-content">
+          <h1 className="page-title">Submit Field Report</h1>
+          <p className="page-subtitle">
+            Upload job site documentation and field engineer reports
+          </p>
+        </div>
         <button 
           className="btn-secondary"
           onClick={() => navigate('/dashboard/field-reports')}
@@ -121,7 +130,7 @@ const FieldReportForm = () => {
 
       {error && (
         <div className="error-banner">
-          {error}
+          <span>{error}</span>
           <button onClick={() => setError(null)}>×</button>
         </div>
       )}

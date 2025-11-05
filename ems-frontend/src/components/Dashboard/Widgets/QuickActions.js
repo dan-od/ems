@@ -1,33 +1,36 @@
 // ems-frontend/src/components/Dashboard/Widgets/QuickActions.js
-// ONLY CHANGE THE ROUTES - Keep everything else the same
+// FINAL FIX - Navigate to RequestHub exactly like your sidebar does
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './Widgets.css';
 
 const QuickActions = ({ role }) => {
-  const navigate = useNavigate();
 
   const engineerActions = [
     {
       icon: '🚗',
       label: 'Request Transport',
-      action: () => navigate('/dashboard/requests/new?type=transport')  // FIXED ROUTE
+      path: '/dashboard/requests',
+      state: { requestType: 'Transport' }
     },
     {
       icon: '🔧',
       label: 'Report Equipment Issue',
-      action: () => navigate('/dashboard/requests/new?type=equipment')  // FIXED ROUTE
+      path: '/dashboard/requests',
+      state: { requestType: 'Equipment' }
     },
     {
       icon: '🦺',
       label: 'Request PPE',
-      action: () => navigate('/dashboard/requests/new?type=ppe')  // FIXED ROUTE
+      path: '/dashboard/requests/ppe',
+      state: { requestType: 'PPE' }
     },
     {
       icon: '📝',
       label: 'Submit Report',
-      action: () => navigate('/dashboard/field-reports/new')  // FIXED ROUTE - added /new
+      path: '/dashboard/field-reports/new',
+      state: null
     }
   ];
 
@@ -35,22 +38,22 @@ const QuickActions = ({ role }) => {
     {
       icon: '✅',
       label: 'Pending Approvals',
-      action: () => navigate('/dashboard/manager-requests')
+      path: '/dashboard/manager-requests'
     },
     {
       icon: '📊',
       label: 'Department Reports',
-      action: () => navigate('/dashboard/reports')
+      path: '/dashboard/reports'
     },
     {
       icon: '👥',
       label: 'Manage Team',
-      action: () => navigate('/dashboard/users')
+      path: '/dashboard/users'
     },
     {
       icon: '🔄',
       label: 'Transfer History',
-      action: () => navigate('/dashboard/reports')
+      path: '/dashboard/reports'
     }
   ];
 
@@ -58,22 +61,22 @@ const QuickActions = ({ role }) => {
     {
       icon: '👤',
       label: 'Add User',
-      action: () => navigate('/dashboard/add-user')
+      path: '/dashboard/add-user'
     },
     {
       icon: '🏢',
       label: 'Manage Departments',
-      action: () => navigate('/dashboard/departments')
+      path: '/dashboard/departments'
     },
     {
       icon: '📊',
       label: 'System Reports',
-      action: () => navigate('/dashboard/reports')
+      path: '/dashboard/reports'
     },
     {
       icon: '⚙️',
       label: 'System Config',
-      action: () => navigate('/dashboard/settings')
+      path: '/dashboard/settings'
     }
   ];
 
@@ -81,22 +84,26 @@ const QuickActions = ({ role }) => {
     {
       icon: '🖥️',
       label: 'IT Support',
-      action: () => navigate('/dashboard/requests/new?type=it')  // FIXED ROUTE
+      path: '/dashboard/requests',
+      state: { requestType: 'IT Support' }
     },
     {
       icon: '🗂️',
       label: 'Office Supplies',
-      action: () => navigate('/dashboard/requests/new?type=material')  // FIXED ROUTE
+      path: '/dashboard/requests',
+      state: { requestType: 'Material' }
     },
     {
       icon: '🚗',
       label: 'Transport Booking',
-      action: () => navigate('/dashboard/requests/new?type=transport')  // FIXED ROUTE
+      path: '/dashboard/requests',
+      state: { requestType: 'Transport' }
     },
     {
       icon: '💰',
       label: 'Travel Advance',
-      action: () => navigate('/dashboard/requests/new?type=finance')  // FIXED ROUTE
+      path: '/dashboard/requests',
+      state: { requestType: 'Finance' }
     }
   ];
 
@@ -117,15 +124,16 @@ const QuickActions = ({ role }) => {
       <h3>⚡ Quick Actions</h3>
       <div className="quick-actions-grid">
         {actions.map((action, index) => (
-          <button
+          <Link
             key={index}
+            to={action.path}
+            state={action.state}
             className="quick-action-btn"
-            onClick={action.action}
-            type="button"  // Important: prevents form submission
+            style={{ textDecoration: 'none' }}
           >
             <span className="action-icon">{action.icon}</span>
             <span className="action-label">{action.label}</span>
-          </button>
+          </Link>
         ))}
       </div>
     </div>
