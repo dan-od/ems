@@ -43,7 +43,7 @@ export default function EquipmentForm() {
         }],
       });
       setMessage("✅ Equipment request submitted successfully!");
-      setTimeout(() => navigate("/dashbaord/my-requests"), 2000);
+      setTimeout(() => navigate("/dashboard/my-requests"), 2000);
     } catch (err) {
       console.error(err);
       setMessage("❌ Failed to submit request");
