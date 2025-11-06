@@ -1,6 +1,6 @@
 // ems-backend/routes/requests/index.js
 // ============================================================================
-// MINIMAL SAFE FIX - Add backward compatibility WITHOUT breaking anything
+// REQUEST ROUTES INDEX - Updated to include Manager Dashboard routes
 // ============================================================================
 
 const express = require('express');
@@ -113,43 +113,61 @@ router.post('/', authenticateJWT(), async (req, res) => {
   }
 });
 
-// ==================== LOAD OTHER ROUTES ====================
-// Now load the modular routes
+// ==================== LOAD MODULAR ROUTES ====================
+// Load all the specialized route modules
+
+// 1. Manager Dashboard Routes (NEW - HIGHEST PRIORITY)
+
+// 2. Create Routes
+
+
+// 3. Approval Routes (PATCH methods)
+try {
+  router.use(require('./approvals'));
+  console.log('  ✅ Approval routes (PATCH approve/reject/transfer)');
+} catch (err) {
+  console.warn('  ⚠️  No approvals.js found');
+}
+
+// 4. Fetch Routes
+
+
+// 5. My Requests Routes
+try {
+  router.use(require('./myRequests'));
+  console.log('  ✅ My Requests routes (/my/list)');
+} catch (err) {
+  console.warn('  ⚠️  No myRequests.js found');
+}
+
+// 6. Department Requests Routes
+try {
+  router.use(require('./deptRequests'));
+  console.log('  ✅ Department Requests routes (/department/requests, /department/all)');
+} catch (err) {
+  console.warn('  ⚠️  No deptRequests.js found');
+}
+try {
+  router.use(require('./managerDashboard'));
+  console.log('  ✅ Manager Dashboard routes (pending-approval, cross-department, PUT approve/reject/transfer)');
+} catch (err) {
+  console.warn('  ⚠️  No managerDashboard.js found -', err.message);
+}
+
 try {
   router.use(require('./create'));
-  console.log('  ✅ /create routes');
+  console.log('  ✅ Create routes (/create, /create/v2, /create/bulk)');
 } catch (err) {
   console.warn('  ⚠️  No create.js found');
 }
 
 try {
-  router.use(require('./approvals'));
-  console.log('  ✅ approval routes');
-} catch (err) {
-  console.warn('  ⚠️  No approvals.js found');
-}
-
-try {
   router.use(require('./fetch'));
-  console.log('  ✅ fetch routes');
+  console.log('  ✅ Fetch routes (/list, /:id, /dashboard/pending)');
 } catch (err) {
   console.warn('  ⚠️  No fetch.js found');
 }
 
-try {
-  router.use(require('./myRequests'));
-  console.log('  ✅ myRequests routes');
-} catch (err) {
-  console.warn('  ⚠️  No myRequests.js found');
-}
-
-try {
-  router.use(require('./deptRequests'));
-  console.log('  ✅ deptRequests routes');
-} catch (err) {
-  console.warn('  ⚠️  No deptRequests.js found');
-}
-
-console.log('✅ [REQUESTS] Request routes loaded\n');
+console.log('✅ [REQUESTS] All request routes loaded\n');
 
 module.exports = router;

@@ -97,6 +97,23 @@ async function logActivity({
       return null;
     }
 
+    // ✅ FIX: Check which columns exist in activity_logs table
+    const columnCheckQuery = `
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'activity_logs'
+      AND column_name IN ('action_type', 'activity_type')
+    `;
+    
+    const columnCheck = await pool.query(columnCheckQuery);
+    const hasActionType = columnCheck.rows.some(r => r.column_name === 'action_type');
+    const hasActivityType = columnCheck.rows.some(r => r.column_name === 'activity_type');
+    
+    // Determine which column name to use
+    const actionColumnName = hasActivityType ? 'activity_type' : 'action_type';
+    
+    console.log(`📝 [ACTIVITY LOG] Using column: ${actionColumnName}`);
+
     // Insert the log
     const query = `
       INSERT INTO activity_logs (
@@ -105,7 +122,7 @@ async function logActivity({
         user_role,
         department_id,
         department_name,
-        action_type,
+        ${actionColumnName},
         entity_type,
         entity_id,
         entity_name,
@@ -142,6 +159,8 @@ async function logActivity({
     // Don't let logging failures break the main operation
     console.error('❌ [ACTIVITY LOG] Failed to log activity:', {
       error: err.message,
+      code: err.code,
+      detail: err.detail,
       userId,
       actionType,
       description
@@ -209,6 +228,7 @@ async function logBothSides({ managerInfo, requesterInfo, request, actionType, s
 // DATABASE SCHEMA (for reference)
 // ===================================================================
 /*
+OPTION 1: If your table has 'activity_type':
 CREATE TABLE IF NOT EXISTS activity_logs (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL,
@@ -216,7 +236,25 @@ CREATE TABLE IF NOT EXISTS activity_logs (
   user_role VARCHAR(50) NOT NULL,
   department_id INTEGER,
   department_name VARCHAR(255),
-  action_type VARCHAR(100) NOT NULL,
+  activity_type VARCHAR(100) NOT NULL,  -- ✅ YOUR COLUMN NAME
+  entity_type VARCHAR(100),
+  entity_id INTEGER,
+  entity_name VARCHAR(500),
+  description TEXT NOT NULL,
+  metadata JSONB,
+  ip_address VARCHAR(50),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+OPTION 2: If your table has 'action_type':
+CREATE TABLE IF NOT EXISTS activity_logs (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  user_name VARCHAR(255) NOT NULL,
+  user_role VARCHAR(50) NOT NULL,
+  department_id INTEGER,
+  department_name VARCHAR(255),
+  action_type VARCHAR(100) NOT NULL,   -- ✅ ALTERNATIVE NAME
   entity_type VARCHAR(100),
   entity_id INTEGER,
   entity_name VARCHAR(500),
@@ -228,7 +266,7 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 
 CREATE INDEX idx_activity_logs_user_id ON activity_logs(user_id);
 CREATE INDEX idx_activity_logs_department_id ON activity_logs(department_id);
-CREATE INDEX idx_activity_logs_action_type ON activity_logs(action_type);
+CREATE INDEX idx_activity_logs_action_type ON activity_logs(activity_type);  -- OR action_type
 CREATE INDEX idx_activity_logs_created_at ON activity_logs(created_at DESC);
 CREATE INDEX idx_activity_logs_entity ON activity_logs(entity_type, entity_id);
 */

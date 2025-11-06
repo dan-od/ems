@@ -40,10 +40,13 @@ router.get('/list', authenticateJWT(), async (req, res) => {
 });
 
 // ----------------------
-// GET request by ID (validated as integer)
+// GET request by ID (FIXED - removed redirect issue)
 // ----------------------
 router.get('/:id', authenticateJWT(), async (req, res) => {
+  console.log('\n📄 [FETCH REQUEST] Getting request details');
   const requestId = parseInt(req.params.id, 10);
+  console.log('👤 User:', { id: req.user.id, role: req.user.role, dept: req.user.department_id });
+  console.log('🔍 Requested ID:', requestId);
 
   if (isNaN(requestId)) {
     return res.status(400).json({ error: 'Request ID must be a number' });
@@ -51,35 +54,77 @@ router.get('/:id', authenticateJWT(), async (req, res) => {
 
   try {
     const { rows } = await pool.query(
-      `SELECT r.*, u1.name as requested_by_name, u2.name as approved_by_name,
-              CASE WHEN r.is_new_equipment THEN r.new_equipment_name ELSE e.name END as display_name
+      `SELECT 
+        r.*, 
+        u1.name as requested_by_name,
+        u1.email as requested_by_email,
+        u2.name as approved_by_name,
+        d.name as department_name,
+        td.name as transferred_to_department_name,
+        ut.name as transferred_by_name,
+        CASE 
+          WHEN r.is_new_equipment THEN r.new_equipment_name 
+          ELSE e.name 
+        END as display_name
        FROM requests r
        LEFT JOIN equipment e ON r.equipment_id = e.id
        LEFT JOIN users u1 ON r.requested_by = u1.id
        LEFT JOIN users u2 ON r.approved_by = u2.id
+       LEFT JOIN departments d ON r.department_id = d.id
+       LEFT JOIN departments td ON r.transferred_to_department = td.id
+       LEFT JOIN users ut ON r.transferred_by = ut.id
        WHERE r.id = $1`,
       [requestId]
     );
 
-    if (!rows.length) return res.status(404).json({ error: 'Request not found' });
+    if (!rows.length) {
+      console.log('❌ Request not found');
+      return res.status(404).json({ error: 'Request not found' });
+    }
 
     const request = rows[0];
+    console.log('✅ Request found:', { 
+      id: request.id, 
+      status: request.status, 
+      dept: request.department_id 
+    });
 
-    // Role restrictions
+    // ✅ FIXED: Allow managers to view requests in their department
+    // Remove the strict authorization that was causing redirects
     if (req.user.role === 'manager') {
-      const mgr = await pool.query(`SELECT department_id FROM users WHERE id = $1`, [req.user.id]);
-      const managerDept = mgr.rows[0]?.department_id;
-      if (request.department_id !== managerDept && request.transferred_to !== req.user.id) {
-        return res.status(403).json({ error: 'Not authorized to view this request' });
+      // Manager can view if:
+      // 1. Request is in their department, OR
+      // 2. Request was transferred to them, OR
+      // 3. They are involved in the approval process
+      const canView = 
+        request.department_id === req.user.department_id ||
+        request.transferred_to_department === req.user.department_id ||
+        request.approved_by === req.user.id ||
+        request.transferred_by === req.user.id;
+
+      if (!canView) {
+        console.log('⚠️ Manager attempting to view request outside their scope');
+        return res.status(403).json({ 
+          error: 'Not authorized to view this request',
+          message: 'This request belongs to another department'
+        });
       }
     }
+
+    // Engineers can only view their own requests
     if (req.user.role === 'engineer' && request.requested_by !== req.user.id) {
-      return res.status(403).json({ error: 'Not authorized to view this request' });
+      console.log('⚠️ Engineer attempting to view another user\'s request');
+      return res.status(403).json({ 
+        error: 'Not authorized to view this request',
+        message: 'You can only view your own requests'
+      });
     }
 
+    console.log('✅ Authorization passed, returning request');
     res.json(request);
+
   } catch (err) {
-    console.error('GET request error:', err);
+    console.error('❌ GET request error:', err);
     res.status(500).json({ error: 'Failed to fetch request' });
   }
 });

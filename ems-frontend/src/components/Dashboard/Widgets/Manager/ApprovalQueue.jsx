@@ -28,14 +28,16 @@ const ApprovalQueue = ({ queue, onRefresh }) => {
     return `${Math.floor(hours / 24)} days ago`;
   };
 
-  const handleQuickApprove = async (requestId) => {
+  // ✅ FIXED: Added departmentId parameter and changed endpoint
+  const handleQuickApprove = async (requestId, departmentId) => {
     if (!window.confirm('Approve this request? This action cannot be undone.')) return;
     
     setProcessingId(requestId);
     try {
-      await api.put(`/requests/${requestId}`, { 
-        status: 'Approved',
-        approved_by: parseInt(localStorage.getItem('userId'))
+      // ✅ FIXED: Call /approve endpoint (matches managerDashboard.js route)
+      await api.put(`/requests/${requestId}/approve`, { 
+        approved_by: parseInt(localStorage.getItem('userId')),
+        department_id: departmentId  // ✅ Required by backend
       });
       
       alert('✅ Request approved successfully!');
@@ -124,7 +126,7 @@ const ApprovalQueue = ({ queue, onRefresh }) => {
               {/* Action Buttons */}
               <div className="flex gap-2">
                 <button 
-                  onClick={() => handleQuickApprove(request.id)}
+                  onClick={() => handleQuickApprove(request.id, request.department_id)}
                   disabled={processingId === request.id}
                   className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
