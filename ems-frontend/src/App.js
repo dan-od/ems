@@ -1,5 +1,5 @@
 // ems-frontend/src/App.js
-// FIXED ROUTING STRUCTURE - Proper nested routes for Request Hub
+// FRONTEND ROUTING - React Router Configuration
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -30,7 +30,7 @@ import MaterialForm from './components/RequestHub/MaterialForm';
 import EquipmentRequestForm from './components/RequestHub/EquipmentRequestForm';
 import TransportForm from './components/RequestHub/TransportForm';
 import MaintenanceForm from './components/RequestHub/MaintenanceForm';
-import MyRequests from './components/Requests/RecentRequests'; // Or your My Requests component
+import MyRequests from './components/Requests/RecentRequests';
 import ManagerRequests from './components/Requests/ManagerRequests';
 import RequestDetail from './components/Requests/RequestDetail';
 
@@ -42,6 +42,13 @@ import DepartmentReports from './components/Reports/DepartmentReports';
 import FieldReportsList from './components/Reports/ReportsList';
 import FieldReportForm from './components/Reports/FieldReportForm';
 import ReportDetail from './components/Reports/ReportDetail';
+
+// ============================================
+// JOB PREPARATION & INSPECTIONS (NEW)
+// ============================================
+import JobPreparationHub from './components/JobPreparation/JobPreparationHub';
+import JobPreparationForm from './components/JobPreparation/JobPreparationForm';
+import JobPreparationDetail from './components/JobPreparation/JobPreparationDetail';
 
 // ============================================
 // USERS (ADMIN)
@@ -97,10 +104,28 @@ function App() {
               EQUIPMENT ROUTES
               ========================================== */}
           <Route path="equipment" element={<EquipmentList />} />
+          <Route path="maintenance" element={<MaintenanceLog />} />
           <Route path="maintenance-logs" element={<MaintenanceLog />} />
 
           {/* ==========================================
-              REQUEST HUB AND FORMS - FIXED STRUCTURE
+              JOB PREPARATION ROUTES (NEW)
+              ========================================== */}
+          <Route path="job-preparation">
+            {/* Job Preparation Hub - Main List */}
+            <Route index element={<JobPreparationHub />} />
+            
+            {/* Create New Job Preparation */}
+            <Route path="new" element={<JobPreparationForm />} />
+            
+            {/* View Job Preparation Details (with Pre/Post-Job tabs) */}
+            <Route path=":id" element={<JobPreparationDetail />} />
+            
+            {/* Edit Job Preparation */}
+            <Route path=":id/edit" element={<JobPreparationForm />} />
+          </Route>
+
+          {/* ==========================================
+              REQUEST HUB AND FORMS
               ========================================== */}
           <Route path="requests">
             {/* Request Hub - Main Page */}
@@ -123,7 +148,7 @@ function App() {
           {/* My Requests Page */}
           <Route path="my-requests" element={<MyRequests />} />
           
-          {/* Recent Requests (if different from My Requests) */}
+          {/* Recent Requests */}
           <Route path="recent-requests" element={<MyRequests />} />
 
           {/* Manager/Admin Only - Department Requests */}
@@ -141,6 +166,7 @@ function App() {
               ========================================== */}
           
           {/* Activity Feed */}
+          <Route path="activity" element={<ActivityFeed />} />
           <Route path="activity-feed" element={<ActivityFeed />} />
           
           {/* Department Reports - Manager/Admin Only */}

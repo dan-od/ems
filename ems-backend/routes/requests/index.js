@@ -114,56 +114,52 @@ router.post('/', authenticateJWT(), async (req, res) => {
 });
 
 // ==================== LOAD MODULAR ROUTES ====================
-// Load all the specialized route modules
+// CRITICAL: Load specific routes BEFORE generic :id routes
 
-// 1. Manager Dashboard Routes (NEW - HIGHEST PRIORITY)
-
-// 2. Create Routes
-
-
-// 3. Approval Routes (PATCH methods)
-try {
-  router.use(require('./approvals'));
-  console.log('  ✅ Approval routes (PATCH approve/reject/transfer)');
-} catch (err) {
-  console.warn('  ⚠️  No approvals.js found');
-}
-
-// 4. Fetch Routes
-
-
-// 5. My Requests Routes
-try {
-  router.use(require('./myRequests'));
-  console.log('  ✅ My Requests routes (/my/list)');
-} catch (err) {
-  console.warn('  ⚠️  No myRequests.js found');
-}
-
-// 6. Department Requests Routes
-try {
-  router.use(require('./deptRequests'));
-  console.log('  ✅ Department Requests routes (/department/requests, /department/all)');
-} catch (err) {
-  console.warn('  ⚠️  No deptRequests.js found');
-}
+// 1. Manager Dashboard Routes (MUST BE FIRST!)
 try {
   router.use(require('./managerDashboard'));
-  console.log('  ✅ Manager Dashboard routes (pending-approval, cross-department, PUT approve/reject/transfer)');
+  console.log('  ✅ Manager Dashboard routes loaded FIRST');
 } catch (err) {
-  console.warn('  ⚠️  No managerDashboard.js found -', err.message);
+  console.error('  ❌ CRITICAL: managerDashboard.js not found!', err.message);
 }
 
+// 2. Create Routes  
 try {
   router.use(require('./create'));
-  console.log('  ✅ Create routes (/create, /create/v2, /create/bulk)');
+  console.log('  ✅ Create routes loaded');
 } catch (err) {
   console.warn('  ⚠️  No create.js found');
 }
 
+// 3. Approval Routes
+try {
+  router.use(require('./approvals'));
+  console.log('  ✅ Approval routes loaded');
+} catch (err) {
+  console.warn('  ⚠️  No approvals.js found');
+}
+
+// 4. My Requests Routes
+try {
+  router.use(require('./myRequests'));
+  console.log('  ✅ My Requests routes loaded');
+} catch (err) {
+  console.warn('  ⚠️  No myRequests.js found');
+}
+
+// 5. Department Requests Routes
+try {
+  router.use(require('./deptRequests'));
+  console.log('  ✅ Department Requests routes loaded');
+} catch (err) {
+  console.warn('  ⚠️  No deptRequests.js found');
+}
+
+// 6. Fetch Routes (MUST BE LAST - has /:id routes)
 try {
   router.use(require('./fetch'));
-  console.log('  ✅ Fetch routes (/list, /:id, /dashboard/pending)');
+  console.log('  ✅ Fetch routes loaded LAST (has /:id routes)');
 } catch (err) {
   console.warn('  ⚠️  No fetch.js found');
 }

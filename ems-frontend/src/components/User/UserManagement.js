@@ -1,4 +1,5 @@
 // src/components/User/UserManagement.js
+import { Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import './UserManagement.css';
@@ -87,64 +88,46 @@ const UserManagement = () => {
   return (
     <div className="user-management">
       <h2>User Management</h2>
+  
       {error && <div className="error-message">{error}</div>}
-      
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Name</label>
-          <input
-            value={newUser.name}
-            onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            value={newUser.email}
-            onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Password</label>
-          <input
-            type="password"
-            value={newUser.password}
-            onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Role</label>
-          <select
-            value={newUser.role}
-            onChange={(e) => setNewUser({...newUser, role: e.target.value})}
-          >
-            <option value="admin">Admin</option>
-            <option value="manager">Manager</option>
-            <option value="engineer">Engineer</option>
-            <option value="staff">Staff</option>
-          </select>
-        </div>
-        <button type="submit">Create User</button>
-      </form>
-
+  
+      {/* 🔸 Shortcut to Add User */}
+      <Link
+        to="/dashboard/add-user"
+        style={{
+          display: 'inline-block',
+          backgroundColor: '#ff7a00',
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: '6px',
+          textDecoration: 'none',
+          marginBottom: '20px',
+          fontWeight: 'bold'
+        }}
+      >
+        ➕ Add New User
+      </Link>
+  
+      {/* 🔸 Users Table (unchanged) */}
       <table>
         <thead>
           <tr>
             <th>Name</th>
             <th>Email</th>
+            <th>Department</th>
             <th>Role</th>
             <th>Actions</th>
           </tr>
         </thead>
+  
         <tbody>
           {users.map(user => (
             <tr key={user.id}>
               <td>{user.name}</td>
               <td>{user.email}</td>
+              <td>{user.department || 'Unassigned'}</td>
+  
+              {/* Role change */}
               <td>
                 <select
                   value={user.role}
@@ -156,6 +139,8 @@ const UserManagement = () => {
                   <option value="staff">Staff</option>
                 </select>
               </td>
+  
+              {/* Delete user */}
               <td>
                 <button onClick={() => handleDeleteUser(user.id)}>Delete</button>
               </td>
@@ -163,8 +148,10 @@ const UserManagement = () => {
           ))}
         </tbody>
       </table>
+  
     </div>
   );
+  
 };
 
 export default UserManagement;

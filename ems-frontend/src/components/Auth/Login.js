@@ -40,7 +40,7 @@ const Login = () => {
   return (
     <div className="login-page">
       <div className="login-container">
-        <img src={logo} alt="Well Fluid Services Limited" className="login-logo" />
+        <img src={logo} alt="" className="login-logo" />
         
         <h2>EMRS</h2>
         <p>Sign in to access your dashboard</p>

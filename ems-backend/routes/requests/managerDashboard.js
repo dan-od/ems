@@ -92,32 +92,69 @@ router.get('/cross-department', authenticateJWT(), checkRole(['manager', 'admin'
       });
     }
 
+    // Updated query to be more inclusive
     const query = `
-      SELECT 
-        r.*,
-        d1.name as from_department,
-        d2.name as to_department,
-        u1.name as transferred_by_name,
-        u2.name as requested_by_name
-      FROM requests r
-      LEFT JOIN departments d1 ON r.department_id = d1.id
-      LEFT JOIN departments d2 ON r.transferred_to_department = d2.id
-      LEFT JOIN users u1 ON r.transferred_by = u1.id
-      LEFT JOIN users u2 ON r.requested_by = u2.id
-      WHERE 
-        (r.transferred_to_department = $1 OR r.department_id = $1)
-        AND r.transferred_at IS NOT NULL
-      ORDER BY r.transferred_at DESC
+      WITH transfer_activities AS (
+        -- Incoming transfers
+        SELECT 
+          r.*,
+          r.department_id as origin_dept_id,
+          r.transferred_to_department as target_dept_id,
+          d1.name as origin_dept_name,
+          d2.name as target_dept_name,
+          u1.name as transferred_by_name,
+          u2.name as requested_by_name,
+          'incoming' as direction
+        FROM requests r
+        LEFT JOIN departments d1 ON r.department_id = d1.id
+        LEFT JOIN departments d2 ON r.transferred_to_department = d2.id
+        LEFT JOIN users u1 ON r.transferred_by = u1.id
+        LEFT JOIN users u2 ON r.requested_by = u2.id
+        WHERE 
+          r.transferred_to_department = $1
+          AND r.transferred_at IS NOT NULL
+          
+        UNION ALL
+        
+        -- Outgoing transfers
+        SELECT 
+          r.*,
+          r.department_id as origin_dept_id,
+          r.transferred_to_department as target_dept_id,
+          d1.name as origin_dept_name,
+          d2.name as target_dept_name,
+          u1.name as transferred_by_name,
+          u2.name as requested_by_name,
+          'outgoing' as direction
+        FROM requests r
+        LEFT JOIN departments d1 ON r.department_id = d1.id
+        LEFT JOIN departments d2 ON r.transferred_to_department = d2.id
+        LEFT JOIN users u1 ON r.transferred_by = u1.id
+        LEFT JOIN users u2 ON r.requested_by = u2.id
+        WHERE 
+          r.department_id = $1
+          AND r.transferred_to_department IS NOT NULL
+          AND r.transferred_to_department != $1
+          AND r.transferred_at IS NOT NULL
+      )
+      SELECT * FROM transfer_activities
+      ORDER BY transferred_at DESC
       LIMIT 50
     `;
 
     const result = await pool.query(query, [departmentId]);
 
-    console.log(`✅ Found ${result.rows.length} transfer activities for department #${departmentId}`);
+    // Separate incoming and outgoing
+    const activities = {
+      incoming: result.rows.filter(r => r.direction === 'incoming'),
+      outgoing: result.rows.filter(r => r.direction === 'outgoing')
+    };
+
+    console.log(`✅ Found ${result.rows.length} transfers (${activities.incoming.length} in, ${activities.outgoing.length} out)`);
 
     res.json({
       success: true,
-      activities: result.rows,
+      activities: activities,
       count: result.rows.length
     });
 

@@ -117,6 +117,18 @@ const Dashboard = () => {
             </li>
 
             {/* ========================================
+                JOB PREPARATION SECTION (NEW)
+                ======================================== */}
+            <li>
+              <Link 
+                to="/dashboard/job-preparation" 
+                className={isActive('/dashboard/job-preparation') ? 'active' : ''}
+              >
+                📋 Job Preparation
+              </Link>
+            </li>
+
+            {/* ========================================
                 REQUESTS SECTION
                 ======================================== */}
             <li>

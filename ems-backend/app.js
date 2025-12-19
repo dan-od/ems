@@ -16,10 +16,15 @@ const maintenanceRequestRoutes = require('./routes/maintenanceRequests');
 const statsRoutes = require('./routes/stats/managerStats');
 const adminStatsRoutes = require('./routes/stats/adminStats');
 const activityLogsRoutes = require('./routes/activityLogs');
+const jobPreparationRoutes = require('./routes/jobPreparation');
+const jobInspectionRoutes = require('./routes/jobInspections');
 
 const app = express();
+const path = require('path');
 
-// Middleware
+// ============================================
+// MIDDLEWARE
+// ============================================
 app.use(cors({
   origin: [
     'http://localhost:3000',
@@ -33,77 +38,114 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Test DB connection
+// ============================================
+// DATABASE CONNECTION TEST
+// ============================================
 pool.query('SELECT NOW()', (err) => {
   if (err) console.error('❌ DB connection error:', err);
   else console.log('✅ DB connected');
 });
 
-// Test route
+// ============================================
+// HEALTH CHECK
+// ============================================
 app.get('/api/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
-// Router middlewares
-console.log('🔹 Registering routes...');
+// ============================================
+// STATIC FILE SERVING (Upload Images)
+// ============================================
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+console.log('📂 Static files: /uploads');
 
+// ============================================
+// REGISTER API ROUTES
+// ============================================
+console.log('\n🔹 Registering API routes...\n');
+
+// Auth
 app.use('/api/auth', authRoutes);
-console.log('  ✅ Auth');
+console.log('  ✅ /api/auth - Authentication');
 
+// Equipment & Assignments
 app.use('/api/equipment', equipmentRoutes);
-console.log('  ✅ Equipment');
+console.log('  ✅ /api/equipment - Equipment Management');
 
 app.use('/api/assignments', assignmentRoutes);
-console.log('  ✅ Assignments');
+console.log('  ✅ /api/assignments - Equipment Assignments');
 
+// Job Preparation (NEW)
+app.use('/api/job-preparations', jobPreparationRoutes);
+console.log('  ✅ /api/job-preparations - Job Preparation System');
+
+app.use('/api/job-inspections', jobInspectionRoutes);
+console.log('  ✅ /api/job-inspections - Pre/Post-Job Inspections');
+
+// Requests System
 app.use('/api/requests', requestRoutes);
-console.log('  ✅ Requests');
-
-app.use('/api/reports', reportsRoutes);
-console.log('  ✅ Reports');
-
-app.use('/api/users', userRoutes);
-console.log('  ✅ Users');
+console.log('  ✅ /api/requests - Request Hub');
 
 app.use('/api/issues', require('./routes/issues'));
-console.log('  ✅ Issues');
+console.log('  ✅ /api/issues - Equipment Issues');
 
 app.use('/api/returns', require('./routes/returns'));
-console.log('  ✅ Returns');
-
-app.use('/api/departments', departmentRoutes);
-console.log('  ✅ Departments');
+console.log('  ✅ /api/returns - Equipment Returns');
 
 app.use('/api/maintenance-requests', maintenanceRequestRoutes);
-console.log('  ✅ Maintenance');
+console.log('  ✅ /api/maintenance-requests - Maintenance Requests');
 
-app.use('/api/dashboard', dashboardRoutes);
-console.log('  ✅ Dashboard');
+// Reports & Activity
+app.use('/api/reports', reportsRoutes);
+console.log('  ✅ /api/reports - Reports');
 
 app.use('/api/field-reports', fieldReportsRoutes);
-console.log('  ✅ Field Reports');
-
-app.use('/api/stats', statsRoutes);
-console.log('  ✅ Stats (Manager)');
-
-app.use('/api/stats', adminStatsRoutes);
-console.log('  ✅ Stats (Admin)');
+console.log('  ✅ /api/field-reports - Field Reports');
 
 app.use('/api/activity-logs', activityLogsRoutes);
-console.log('  ✅ Activity Logs');
+console.log('  ✅ /api/activity-logs - Activity Logs');
 
-console.log('✅ All routes registered\n');
+// Dashboard & Stats
+app.use('/api/dashboard', dashboardRoutes);
+console.log('  ✅ /api/dashboard - Dashboard Data');
 
-// Error handling
+app.use('/api/stats', statsRoutes);
+console.log('  ✅ /api/stats - Manager Stats');
+
+app.use('/api/stats', adminStatsRoutes);
+console.log('  ✅ /api/stats - Admin Stats');
+
+// User Management
+app.use('/api/users', userRoutes);
+console.log('  ✅ /api/users - User Management');
+
+app.use('/api/departments', departmentRoutes);
+console.log('  ✅ /api/departments - Department Management');
+
+console.log('\n✅ All routes registered successfully!\n');
+
+// ============================================
+// ERROR HANDLING MIDDLEWARE
+// ============================================
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something broke!' });
+  console.error('❌ Server Error:', err.stack);
+  res.status(500).json({ 
+    error: 'Something broke!',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
 });
 
-// Start server
+// ============================================
+// START SERVER
+// ============================================
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
+  console.log('═══════════════════════════════════════════════');
+  console.log('🚀 Services EMS Backend Server');
+  console.log('═══════════════════════════════════════════════');
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`   Local:   http://localhost:${PORT}`);
   console.log(`   Network: http://192.168.2.50:${PORT}`);
+  console.log(`   Health:  http://localhost:${PORT}/api/health`);
+  console.log('═══════════════════════════════════════════════\n');
 });

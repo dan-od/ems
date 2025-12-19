@@ -138,6 +138,31 @@ export const equipmentService = {
       throw error;
     }
   },
+  // Add equipment with images
+  createWithImages: (formData) => {
+    return api.post('/equipment', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+
+  // Upload images to existing equipment
+  uploadImages: (id, formData) => {
+    return api.post(`/equipment/${id}/images`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+
+  // Delete image
+  deleteImage: (id, image_url) => {
+    return api.delete(`/equipment/${id}/images`, { data: { image_url } });
+  },
+
+  // Create maintenance log with images
+  createMaintenanceWithImages: (id, formData) => {
+    return api.post(`/equipment/${id}/maintenance`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
 };
 
 // ----- Users -----
